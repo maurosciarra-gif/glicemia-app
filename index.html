@@ -167,9 +167,9 @@ function salva() {
         colazione: colazione.value,
         pranzo: pranzo.value,
         cena: cena.value,
-        ins_colazione: calcolaInsulina(Number(colazione.value), "col"),
-        ins_pranzo: calcolaInsulina(Number(pranzo.value), "pra"),
-        ins_cena: calcolaInsulina(Number(cena.value), "cen")
+        ins_colazione: ins_colazione.value || calcolaInsulina(Number(colazione.value), "col"),
+        ins_pranzo: ins_pranzo.value || calcolaInsulina(Number(pranzo.value), "pra"),
+        ins_cena: ins_cena.value || calcolaInsulina(Number(cena.value), "cen")")
     };
 
     let esiste = dati.find(d => d.data === nuovo.data);
