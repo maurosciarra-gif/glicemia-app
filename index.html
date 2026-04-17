@@ -1,0 +1,737 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Registro Glicemia e Insulina</title>
+
+  <meta name="theme-color" content="#2563eb" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-title" content="Glicemia" />
+
+  <link rel="manifest" href="manifest.json" />
+  <link rel="icon" href="icon.svg" type="image/svg+xml" />
+  <link rel="apple-touch-icon" href="icon.svg" />
+
+  <style>
+    :root{
+      --bg:#f3f7fb;
+      --card:#ffffff;
+      --text:#1f2937;
+      --muted:#6b7280;
+      --line:#dbe4ee;
+      --primary:#2563eb;
+      --primary-dark:#1d4ed8;
+      --danger:#dc2626;
+      --danger-bg:#fee2e2;
+      --ok:#16a34a;
+      --soft:#eef4ff;
+      --radius:18px;
+      --shadow:0 10px 30px rgba(15,23,42,.08);
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family:Arial,Helvetica,sans-serif;
+      color:var(--text);
+      background:var(--bg)
+    }
+    .wrap{
+      max-width:1100px;
+      margin:0 auto;
+      padding:14px
+    }
+    h1{
+      font-size:28px;
+      line-height:1.15;
+      margin:8px 0 6px
+    }
+    h2{
+      margin:0 0 12px
+    }
+    .sub{
+      color:var(--muted);
+      margin:0 0 16px;
+      font-size:15px
+    }
+    .card{
+      background:var(--card);
+      border:1px solid var(--line);
+      border-radius:var(--radius);
+      box-shadow:var(--shadow);
+      padding:16px;
+      margin-bottom:16px
+    }
+    .label{
+      display:block;
+      font-size:14px;
+      font-weight:bold;
+      color:var(--muted);
+      margin:0 0 6px
+    }
+    input,select{
+      width:100%;
+      min-height:50px;
+      padding:12px 14px;
+      border:1px solid var(--line);
+      border-radius:14px;
+      font-size:17px;
+      outline:none;
+      background:#fff
+    }
+    input:focus,select:focus{
+      border-color:var(--primary);
+      box-shadow:0 0 0 3px rgba(37,99,235,.12)
+    }
+    .grid-3{
+      display:grid;
+      grid-template-columns:1fr;
+      gap:14px
+    }
+    .meal{
+      border:1px solid var(--line);
+      border-radius:16px;
+      background:#fbfdff;
+      padding:14px
+    }
+    .meal h2{
+      margin:0 0 12px;
+      font-size:22px
+    }
+    .row{
+      display:grid;
+      grid-template-columns:1fr;
+      gap:12px
+    }
+    .actions{
+      display:flex;
+      flex-wrap:wrap;
+      gap:10px;
+      margin-top:14px
+    }
+    button{
+      min-height:48px;
+      padding:12px 16px;
+      border:none;
+      border-radius:14px;
+      font-size:16px;
+      font-weight:bold;
+      cursor:pointer
+    }
+    .btn-primary{background:var(--primary);color:#fff}
+    .btn-primary:active{background:var(--primary-dark)}
+    .btn-soft{background:var(--soft);color:#1843a5}
+    .btn-danger{background:var(--danger-bg);color:#991b1b}
+    .btn-small{
+      min-height:38px;
+      padding:8px 12px;
+      font-size:14px;
+      border-radius:12px
+    }
+    .msg{
+      min-height:20px;
+      margin-top:10px;
+      color:var(--ok);
+      font-size:14px
+    }
+    .summary{
+      display:grid;
+      grid-template-columns:1fr;
+      gap:10px
+    }
+    .summary-item{
+      border:1px solid var(--line);
+      border-radius:14px;
+      padding:12px 14px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      background:#fcfdff
+    }
+    .summary-item span{
+      color:var(--muted);
+      font-size:14px
+    }
+    .summary-item strong{
+      font-size:19px
+    }
+    .table-wrap{
+      overflow:auto;
+      -webkit-overflow-scrolling:touch;
+      border:1px solid var(--line);
+      border-radius:14px
+    }
+    table{
+      width:100%;
+      border-collapse:collapse;
+      min-width:760px;
+      background:#fff
+    }
+    th,td{
+      border-bottom:1px solid var(--line);
+      text-align:left;
+      padding:12px 10px;
+      font-size:14px;
+      vertical-align:middle
+    }
+    th{background:#f8fafc}
+    tr:last-child td{border-bottom:none}
+    .empty{
+      text-align:center;
+      color:var(--muted);
+      padding:18px
+    }
+    .badge{
+      display:inline-block;
+      min-width:58px;
+      text-align:center;
+      padding:6px 10px;
+      border-radius:999px;
+      font-weight:bold;
+      font-size:12px
+    }
+    .g-low{background:#e0f2fe;color:#075985}
+    .g-ok{background:#dcfce7;color:#166534}
+    .g-high{background:#fef3c7;color:#92400e}
+    .note{
+      margin-top:8px;
+      font-size:13px;
+      color:var(--muted)
+    }
+    .install-box{
+      display:none;
+      margin-top:12px;
+      padding:12px;
+      border:1px dashed var(--line);
+      border-radius:14px;
+      background:#f8fbff
+    }
+    @media (min-width:760px){
+      .grid-3{grid-template-columns:repeat(3, 1fr)}
+      .summary{grid-template-columns:repeat(4, 1fr)}
+      .row.two{grid-template-columns:1fr 1fr}
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>Registro Glicemia e Insulina</h1>
+    <p class="sub">Versione app per telefono con salvataggio automatico, tabella dettagliata, tabella giornaliera e CSV giornaliero.</p>
+
+    <div class="card">
+      <div class="row two">
+        <div>
+          <label class="label" for="data">Data</label>
+          <input id="data" type="date" />
+        </div>
+        <div>
+          <label class="label" for="notaGiorno">Nota del giorno</label>
+          <input id="notaGiorno" type="text" placeholder="Facoltativa" />
+        </div>
+      </div>
+
+      <div class="grid-3" style="margin-top:14px;">
+        <div class="meal">
+          <h2>Colazione</h2>
+          <label class="label" for="g_col">Glicemia</label>
+          <input id="g_col" type="number" inputmode="decimal" placeholder="Es. 110" />
+          <label class="label" for="i_col">Insulina</label>
+          <input id="i_col" type="number" inputmode="decimal" placeholder="Es. 8" />
+        </div>
+
+        <div class="meal">
+          <h2>Pranzo</h2>
+          <label class="label" for="g_pra">Glicemia</label>
+          <input id="g_pra" type="number" inputmode="decimal" placeholder="Es. 125" />
+          <label class="label" for="i_pra">Insulina</label>
+          <input id="i_pra" type="number" inputmode="decimal" placeholder="Es. 10" />
+        </div>
+
+        <div class="meal">
+          <h2>Cena</h2>
+          <label class="label" for="g_cen">Glicemia</label>
+          <input id="g_cen" type="number" inputmode="decimal" placeholder="Es. 118" />
+          <label class="label" for="i_cen">Insulina</label>
+          <input id="i_cen" type="number" inputmode="decimal" placeholder="Es. 9" />
+        </div>
+      </div>
+
+      <div class="actions">
+        <button class="btn-primary" onclick="aggiungiGiornata()">Aggiungi alla tabella</button>
+        <button class="btn-soft" onclick="esportaCSV()">Esporta CSV giornaliero</button>
+        <button class="btn-soft" onclick="creaBackupJSON()">Backup dati</button>
+        <button class="btn-danger" onclick="svuotaTutto()">Svuota tutto</button>
+      </div>
+
+      <div class="install-box" id="installBox">
+        <div style="margin-bottom:10px;font-weight:bold;">Puoi installare questa app nella schermata Home.</div>
+        <button class="btn-primary" id="installBtn">Installa app</button>
+      </div>
+
+      <div id="msg" class="msg"></div>
+      <div class="note">Se non compare “Installa app”, apri il menu di Chrome e usa “Aggiungi a schermata Home”.</div>
+    </div>
+
+    <div class="card">
+      <div class="summary">
+        <div class="summary-item"><span>Media glicemia</span><strong id="mediaG">-</strong></div>
+        <div class="summary-item"><span>Totale insulina</span><strong id="totaleI">-</strong></div>
+        <div class="summary-item"><span>Registrazioni</span><strong id="numR">0</strong></div>
+        <div class="summary-item"><span>Ultima data</span><strong id="ultimaData">-</strong></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="row two" style="margin-bottom:12px;">
+        <div>
+          <label class="label" for="filtroData">Filtra per data</label>
+          <input id="filtroData" type="date" onchange="render()" />
+        </div>
+        <div>
+          <label class="label" for="filtroPasto">Filtra per pasto</label>
+          <select id="filtroPasto" onchange="render()">
+            <option value="">Tutti</option>
+            <option value="Colazione">Colazione</option>
+            <option value="Pranzo">Pranzo</option>
+            <option value="Cena">Cena</option>
+          </select>
+        </div>
+      </div>
+
+      <h2>Tabella giornaliera</h2>
+      <div class="table-wrap" style="margin-bottom:16px;">
+        <table>
+          <thead>
+            <tr>
+              <th>Data</th>
+              <th>Colazione</th>
+              <th>Pranzo</th>
+              <th>Cena</th>
+              <th>Insulina totale</th>
+              <th>Media insulina giornaliera</th>
+            </tr>
+          </thead>
+          <tbody id="tbodyDaily"></tbody>
+        </table>
+      </div>
+
+      <h2>Tabella dettagliata</h2>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Data</th>
+              <th>Pasto</th>
+              <th>Glicemia</th>
+              <th>Livello</th>
+              <th>Insulina</th>
+              <th>Nota</th>
+              <th>Azioni</th>
+            </tr>
+          </thead>
+          <tbody id="tbody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+<script>
+const KEY = 'registro_glicemia_insulina_pwa_v1';
+let editId = null;
+let deferredPrompt = null;
+
+function oggi(){
+  const d = new Date();
+  const y = d.getFullYear();
+  const m = String(d.getMonth()+1).padStart(2,'0');
+  const day = String(d.getDate()).padStart(2,'0');
+  return `${y}-${m}-${day}`;
+}
+
+function getData(){
+  try {
+    return JSON.parse(localStorage.getItem(KEY)) || [];
+  } catch(e){
+    return [];
+  }
+}
+
+function setData(v){
+  localStorage.setItem(KEY, JSON.stringify(v));
+}
+
+function msg(t, ok=true){
+  const el = document.getElementById('msg');
+  el.style.color = ok ? 'var(--ok)' : 'var(--danger)';
+  el.textContent = t;
+  setTimeout(() => {
+    if(el.textContent === t) el.textContent = '';
+  }, 2200);
+}
+
+function badgeGlicemia(value){
+  const v = Number(value);
+  if (Number.isNaN(v)) return '<span class="badge">-</span>';
+  if (v < 80) return '<span class="badge g-low">Bassa</span>';
+  if (v <= 130) return '<span class="badge g-ok">Ok</span>';
+  return '<span class="badge g-high">Alta</span>';
+}
+
+function campi(){
+  return {
+    data: document.getElementById('data').value,
+    nota: document.getElementById('notaGiorno').value.trim(),
+    pasti: [
+      { pasto:'Colazione', glicemia: document.getElementById('g_col').value.trim(), insulina: document.getElementById('i_col').value.trim() },
+      { pasto:'Pranzo', glicemia: document.getElementById('g_pra').value.trim(), insulina: document.getElementById('i_pra').value.trim() },
+      { pasto:'Cena', glicemia: document.getElementById('g_cen').value.trim(), insulina: document.getElementById('i_cen').value.trim() }
+    ]
+  };
+}
+
+function pulisciCampi(){
+  document.getElementById('notaGiorno').value = '';
+  document.getElementById('g_col').value = '';
+  document.getElementById('i_col').value = '';
+  document.getElementById('g_pra').value = '';
+  document.getElementById('i_pra').value = '';
+  document.getElementById('g_cen').value = '';
+  document.getElementById('i_cen').value = '';
+  editId = null;
+}
+
+function aggiungiGiornata(){
+  const c = campi();
+
+  if (!c.data){
+    msg('Inserisci la data.', false);
+    return;
+  }
+
+  const righeNuove = c.pasti
+    .filter(r => r.glicemia !== '' || r.insulina !== '')
+    .map(r => ({
+      id: crypto.randomUUID ? crypto.randomUUID() : String(Date.now()+Math.random()),
+      data: c.data,
+      pasto: r.pasto,
+      glicemia: r.glicemia,
+      insulina: r.insulina,
+      nota: c.nota
+    }));
+
+  if (!righeNuove.length){
+    msg('Inserisci almeno un valore.', false);
+    return;
+  }
+
+  const dati = getData();
+  setData([...righeNuove, ...dati]);
+  pulisciCampi();
+  render();
+  msg('Registrazione salvata.');
+}
+
+function eliminaRiga(id){
+  const dati = getData().filter(r => r.id !== id);
+  setData(dati);
+  render();
+  msg('Riga eliminata.');
+}
+
+function modificaRiga(id){
+  const r = getData().find(x => x.id === id);
+  if (!r) return;
+
+  document.getElementById('data').value = r.data || oggi();
+  document.getElementById('notaGiorno').value = r.nota || '';
+  document.getElementById('g_col').value = '';
+  document.getElementById('i_col').value = '';
+  document.getElementById('g_pra').value = '';
+  document.getElementById('i_pra').value = '';
+  document.getElementById('g_cen').value = '';
+  document.getElementById('i_cen').value = '';
+
+  if (r.pasto === 'Colazione') {
+    document.getElementById('g_col').value = r.glicemia || '';
+    document.getElementById('i_col').value = r.insulina || '';
+  }
+  if (r.pasto === 'Pranzo') {
+    document.getElementById('g_pra').value = r.glicemia || '';
+    document.getElementById('i_pra').value = r.insulina || '';
+  }
+  if (r.pasto === 'Cena') {
+    document.getElementById('g_cen').value = r.glicemia || '';
+    document.getElementById('i_cen').value = r.insulina || '';
+  }
+
+  editId = id;
+  window.scrollTo({top: 0, behavior: 'smooth'});
+  msg('Modifica: aggiorna il valore e premi Salva modifica.');
+  mostraPulsanteSalva();
+}
+
+function mostraPulsanteSalva(){
+  let b = document.getElementById('btnSaveEdit');
+  if (!b){
+    b = document.createElement('button');
+    b.id = 'btnSaveEdit';
+    b.className = 'btn-primary';
+    b.textContent = 'Salva modifica';
+    b.onclick = salvaModifica;
+    document.querySelector('.actions').prepend(b);
+  }
+}
+
+function nascondiPulsanteSalva(){
+  const b = document.getElementById('btnSaveEdit');
+  if (b) b.remove();
+}
+
+function salvaModifica(){
+  if (!editId){
+    msg('Nessuna riga in modifica.', false);
+    return;
+  }
+
+  const c = campi();
+  const daScrivere = c.pasti.filter(r => r.glicemia !== '' || r.insulina !== '');
+
+  if (daScrivere.length !== 1){
+    msg('Per modificare, compila solo il pasto della riga scelta.', false);
+    return;
+  }
+
+  const dati = getData();
+  const idx = dati.findIndex(r => r.id === editId);
+
+  if (idx === -1){
+    msg('Riga non trovata.', false);
+    return;
+  }
+
+  dati[idx] = {
+    ...dati[idx],
+    data: c.data,
+    pasto: daScrivere[0].pasto,
+    glicemia: daScrivere[0].glicemia,
+    insulina: daScrivere[0].insulina,
+    nota: c.nota
+  };
+
+  setData(dati);
+  pulisciCampi();
+  nascondiPulsanteSalva();
+  render();
+  msg('Modifica salvata.');
+}
+
+function svuotaTutto(){
+  localStorage.removeItem(KEY);
+  pulisciCampi();
+  nascondiPulsanteSalva();
+  render();
+  msg('Tutti i dati sono stati cancellati.');
+}
+
+function datiFiltrati(){
+  const fd = document.getElementById('filtroData').value;
+  const fp = document.getElementById('filtroPasto').value;
+
+  return getData().filter(r => {
+    const okData = !fd || r.data === fd;
+    const okPasto = !fp || r.pasto === fp;
+    return okData && okPasto;
+  });
+}
+
+function raggruppaPerGiorno(dati){
+  const gruppi = {};
+
+  dati.forEach(r => {
+    if (!gruppi[r.data]) {
+      gruppi[r.data] = {
+        data: r.data,
+        colazione: '',
+        pranzo: '',
+        cena: '',
+        insulinaTotale: 0,
+        contaInsulina: 0
+      };
+    }
+
+    if (r.pasto === 'Colazione') gruppi[r.data].colazione = r.glicemia || '';
+    if (r.pasto === 'Pranzo') gruppi[r.data].pranzo = r.glicemia || '';
+    if (r.pasto === 'Cena') gruppi[r.data].cena = r.glicemia || '';
+
+    const ins = Number(r.insulina);
+    if (!Number.isNaN(ins) && r.insulina !== '') {
+      gruppi[r.data].insulinaTotale += ins;
+      gruppi[r.data].contaInsulina += 1;
+    }
+  });
+
+  return Object.values(gruppi).sort((a, b) => a.data.localeCompare(b.data));
+}
+
+function esportaCSV(){
+  const dati = datiFiltrati();
+  if (!dati.length){
+    msg('Nessun dato da esportare.', false);
+    return;
+  }
+
+  const giornalieri = raggruppaPerGiorno(dati);
+
+  const rows = [
+    ['Data','Colazione','Pranzo','Cena','Insulina totale','Media insulina giornaliera']
+  ];
+
+  giornalieri.forEach(g => {
+    const mediaInsulina = g.contaInsulina > 0
+      ? (g.insulinaTotale / g.contaInsulina).toFixed(1)
+      : '';
+
+    rows.push([
+      g.data,
+      g.colazione,
+      g.pranzo,
+      g.cena,
+      g.insulinaTotale ? g.insulinaTotale.toFixed(1) : '',
+      mediaInsulina
+    ]);
+  });
+
+  const csv = rows
+    .map(r => r.map(v => `"${String(v).replaceAll('"','""')}"`).join(';'))
+    .join('\n');
+
+  const blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
+  downloadBlob(blob, 'registro_glicemia_giornaliero.csv');
+}
+
+function creaBackupJSON(){
+  const dati = getData();
+  if (!dati.length){
+    msg('Nessun dato da salvare.', false);
+    return;
+  }
+  const blob = new Blob([JSON.stringify(dati, null, 2)], {type:'application/json'});
+  downloadBlob(blob, 'backup_glicemia_insulina.json');
+}
+
+function downloadBlob(blob, filename){
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+function aggiornaRiepilogo(dati){
+  const glicemie = dati.map(r => Number(r.glicemia)).filter(v => !Number.isNaN(v) && v > 0);
+  const insuline = dati.map(r => Number(r.insulina)).filter(v => !Number.isNaN(v) && v >= 0);
+
+  document.getElementById('mediaG').textContent = glicemie.length
+    ? (glicemie.reduce((a,b) => a+b, 0) / glicemie.length).toFixed(1)
+    : '-';
+
+  document.getElementById('totaleI').textContent = insuline.length
+    ? insuline.reduce((a,b) => a+b, 0).toFixed(1)
+    : '-';
+
+  document.getElementById('numR').textContent = dati.length;
+  document.getElementById('ultimaData').textContent = dati.length ? dati[0].data : '-';
+}
+
+function renderTabellaDettagliata(dati){
+  const tbody = document.getElementById('tbody');
+  tbody.innerHTML = '';
+
+  if (!dati.length){
+    tbody.innerHTML = '<tr><td colspan="7" class="empty">Nessuna registrazione trovata.</td></tr>';
+    return;
+  }
+
+  dati.forEach(r => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>${r.data || '-'}</td>
+      <td>${r.pasto || '-'}</td>
+      <td>${r.glicemia || '-'}</td>
+      <td>${badgeGlicemia(r.glicemia)}</td>
+      <td>${r.insulina || '-'}</td>
+      <td>${r.nota || '-'}</td>
+      <td>
+        <button class="btn-soft btn-small" onclick="modificaRiga('${r.id}')">Modifica</button>
+        <button class="btn-danger btn-small" onclick="eliminaRiga('${r.id}')">Elimina</button>
+      </td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+function renderTabellaGiornaliera(dati){
+  const tbody = document.getElementById('tbodyDaily');
+  tbody.innerHTML = '';
+
+  const giornalieri = raggruppaPerGiorno(dati);
+
+  if (!giornalieri.length){
+    tbody.innerHTML = '<tr><td colspan="6" class="empty">Nessun dato giornaliero.</td></tr>';
+    return;
+  }
+
+  giornalieri.forEach(g => {
+    const mediaInsulina = g.contaInsulina > 0
+      ? (g.insulinaTotale / g.contaInsulina).toFixed(1)
+      : '-';
+
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>${g.data || '-'}</td>
+      <td>${g.colazione || '-'}</td>
+      <td>${g.pranzo || '-'}</td>
+      <td>${g.cena || '-'}</td>
+      <td>${g.contaInsulina > 0 ? g.insulinaTotale.toFixed(1) : '-'}</td>
+      <td>${mediaInsulina}</td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+function render(){
+  const dati = datiFiltrati();
+  aggiornaRiepilogo(dati);
+  renderTabellaGiornaliera(dati);
+  renderTabellaDettagliata(dati);
+}
+
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  deferredPrompt = e;
+  document.getElementById('installBox').style.display = 'block';
+});
+
+document.getElementById('installBtn').addEventListener('click', async () => {
+  if (!deferredPrompt) return;
+  deferredPrompt.prompt();
+  await deferredPrompt.userChoice;
+  deferredPrompt = null;
+  document.getElementById('installBox').style.display = 'none';
+});
+
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./service-worker.js');
+  });
+}
+
+document.getElementById('data').value = oggi();
+render();
+</script>
+</body>
+</html>
