@@ -215,7 +215,7 @@ function grafico() {
 
     if (chart) chart.destroy();
 
-    chart = new Chart(grafico, {
+   chart = new Chart(document.getElementById("grafico"), {
         type: 'line',
         data: {
             labels,
