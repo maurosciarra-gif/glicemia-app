@@ -126,12 +126,12 @@ function ieri() {
 function calcolaInsulina(valore, pasto) {
 
     let tabella = [
-        {min:80, max:120, col:5, pra:6, cen:5},
-        {min:120, max:160, col:6, pra:7, cen:6},
-        {min:160, max:200, col:7, pra:8, cen:7},
-        {min:200, max:240, col:8, pra:9, cen:8},
-        {min:240, max:280, col:9, pra:10, cen:9},
-        {min:280, max:320, col:10, pra:11, cen:10}
+        {min:80, max:120, col:3, pra:4, cen:3},
+        {min:120, max:160, col:4, pra:5, cen:4},
+        {min:160, max:200, col:5, pra:6, cen:5},
+        {min:200, max:240, col:5, pra:6, cen:6},
+        {min:240, max:280, col:6, pra:7, cen:7},
+        {min:280, max:320, col:7, pra:8, cen:8}
     ];
 
     let riga = tabella.find(r => valore >= r.min && valore < r.max);
