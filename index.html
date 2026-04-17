@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Glicemia App</title>
+
+<link rel="manifest" href="manifest.json">
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+body {
+    font-family: Arial;
+    padding: 15px;
+    background: #f4f4f4;
+}
+
+h2 { text-align: center; }
+
+input {
+    width: 100%;
+    padding: 10px;
+    font-size: 16px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+}
+
+.card {
+    padding: 12px;
+    border-radius: 12px;
+    margin: 10px 0;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
+
+.colazione { background: #d0ebff; }
+.pranzo { background: #ffe8cc; }
+.cena { background: #e7ddff; }
+
+.green { border: 2px solid #28a745; }
+.yellow { border: 2px solid #ffc107; }
+.red { border: 2px solid #dc3545; }
+
+button {
+    width: 100%;
+    padding: 15px;
+    font-size: 18px;
+    background: #2c7be5;
+    color: white;
+    border: none;
+    border-radius: 10px;
+}
+
+table {
+    width: 100%;
+    margin-top: 15px;
+    background: white;
+    border-collapse: collapse;
+}
+
+td, th {
+    padding: 8px;
+    border: 1px solid #ccc;
+    text-align: center;
+}
+
+canvas { margin-top: 20px; background: white; }
+</style>
+</head>
+
+<body>
+
+<h2>📊 Glicemia App</h2>
+
+<input type="date" id="data">
+
+<div class="card colazione">
+<h3>🌅 Colazione</h3>
+<input type="number" id="colazione" oninput="check(this)">
+</div>
+
+<div class="card pranzo">
+<h3>🌞 Pranzo</h3>
+<input type="number" id="pranzo" oninput="check(this)">
+</div>
+
+<div class="card cena">
+<h3>🌙 Cena</h3>
+<input type="number" id="cena" oninput="check(this)">
+</div>
+
+<div class="card">
+<h3>💉 Insulina</h3>
+<input type="number" id="insulina">
+</div>
+
+<button onclick="salva()">💾 Salva</button>
+<button onclick="promemoria()">🔔 Promemoria</button>
+
+<h3 id="alert"></h3>
+
+<table id="tabella"></table>
+
+<h3 id="media"></h3>
+
+<canvas id="grafico"></canvas>
+
+<script>
+let dati = JSON.parse(localStorage.getItem("glicemia")) || [];
+let chart;
+
+function check(input) {
+    let val = Number(input.value);
+    input.classList.remove("green","yellow","red");
+
+    if (val < 80) input.classList.add("yellow");
+    else if (val <= 140) input.classList.add("green");
+    else input.classList.add("red");
+}
+
+function salva() {
+    let nuovo = {
+        data: data.value,
+        colazione: colazione.value,
+        pranzo: pranzo.value,
+        cena: cena.value,
+        insulina: insulina.value
+    };
+
+    if (!nuovo.data) return alert("Inserisci data");
+
+    dati.push(nuovo);
+    localStorage.setItem("glicemia", JSON.stringify(dati));
+
+    // backup automatico
+    let blob = new Blob([JSON.stringify(dati)], { type: "application/json" });
+    let a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = "glicemia_backup.json";
+    a.click();
+
+    aggiorna();
+
+    document.querySelectorAll("input").forEach(i => i.value = "");
+}
+
+function aggiorna() {
+    let tab = document.getElementById("tabella");
+    tab.innerHTML = "<tr><th>Data</th><th>Col</th><th>Pra</th><th>Cena</th><th>Ins</th></tr>";
+
+    let totale = 0;
+
+    dati.forEach(d => {
+        tab.innerHTML += `<tr>
+        <td>${d.data}</td>
+        <td>${d.colazione}</td>
+        <td>${d.pranzo}</td>
+        <td>${d.cena}</td>
+        <td>${d.insulina}</td>
+        </tr>`;
+        totale += Number(d.insulina);
+    });
+
+    document.getElementById("media").innerText =
+        "Media insulina: " + (totale/dati.length || 0).toFixed(2);
+
+    grafico();
+}
+
+function grafico() {
+    let labels = dati.map(d => d.data);
+
+    if (chart) chart.destroy();
+
+    chart = new Chart(grafico, {
+        type: 'line',
+        data: {
+            labels,
+            datasets: [
+                { label: "Colazione", data: dati.map(d=>d.colazione) },
+                { label: "Pranzo", data: dati.map(d=>d.pranzo) },
+                { label: "Cena", data: dati.map(d=>d.cena) }
+            ]
+        }
+    });
+}
+
+function promemoria() {
+    Notification.requestPermission().then(p => {
+        if (p === "granted") {
+            setInterval(() => {
+                new Notification("Controlla glicemia");
+            }, 86400000);
+        }
+    });
+}
+
+aggiorna();
+</script>
+
+</body>
+</html>
