@@ -101,6 +101,7 @@
       background:#fff;
       outline:none;
       margin-bottom:10px;
+      transition:opacity .15s ease;
     }
 
     .field:focus{
@@ -337,6 +338,7 @@
 
     <div class="section-actions">
       <button id="btnSalva" class="btn btn-primary" onclick="salvaGiornata()">Salva giornata</button>
+      <button id="btnSblocca" class="btn btn-soft" onclick="sbloccaModifica()" disabled>Sblocca modifica</button>
       <button class="btn btn-soft" onclick="pulisciCampi()">Pulisci campi</button>
       <button class="btn btn-soft" onclick="esportaCSV()">Esporta CSV</button>
       <button class="btn btn-soft" onclick="creaBackupJSON()">Backup JSON</button>
@@ -345,8 +347,9 @@
     </div>
 
     <div class="note">
-      Lasciare un campo vuoto non cancella il valore già salvato.<br>
-      Per azzerare un valore, scrivi <strong>0</strong> e poi premi <strong>Salva giornata</strong>.
+      Giorno esistente = campi bloccati.<br>
+      Premi <strong>Sblocca modifica</strong> per correggere una giornata già salvata.<br>
+      Se lasci un campo vuoto non cancelli il valore precedente. Per azzerare, scrivi <strong>0</strong>.
     </div>
 
     <input
@@ -461,10 +464,11 @@
   </div>
 
 <script>
-const KEY = 'glicemia_diario_corretto_v1';
-const KEY_SCHEMA = 'glicemia_schema_dottoressa_v5';
+const KEY = 'glicemia_diario_bloccato_v1';
+const KEY_SCHEMA = 'glicemia_schema_dottoressa_v6';
 
 let salvataggioInCorso = false;
+let modificaSbloccata = false;
 
 const SCHEMA_DEFAULT = [
   { min: 80,  max: 120, col: 5,  pra: 6,  cen: 5,  not: 5 },
@@ -530,6 +534,29 @@ function msg(t, ok=true){
   }, 2600);
 }
 
+function setCampiBloccati(bloccati){
+  const ids = [
+    'g_col','i_col','g_col_post',
+    'g_pra','i_pra','g_pra_post',
+    'g_cen','i_cen','g_cen_post',
+    'g_not','i_not'
+  ];
+
+  ids.forEach(id => {
+    const el = document.getElementById(id);
+    el.readOnly = bloccati;
+    el.style.opacity = bloccati ? '0.78' : '1';
+  });
+
+  document.getElementById('btnSblocca').disabled = !bloccati;
+}
+
+function sbloccaModifica(){
+  modificaSbloccata = true;
+  setCampiBloccati(false);
+  msg('Modifica sbloccata. Ora puoi correggere i valori.');
+}
+
 function calcolaInsulina(glicemia, tipo){
   const g = Number(glicemia);
   if (Number.isNaN(g)) return '';
@@ -584,6 +611,8 @@ function pulisciCampi(){
   document.getElementById('g_not').value = '';
   document.getElementById('i_not').value = '';
 
+  modificaSbloccata = false;
+  setCampiBloccati(false);
   aggiornaTutteLeDosi();
 }
 
@@ -595,7 +624,7 @@ function caricaOPulisciPerData(){
 
   if (!r){
     pulisciCampi();
-    msg('Nuova data: campi puliti.');
+    msg('Nuova data: campi liberi.');
     return;
   }
 
@@ -614,8 +643,10 @@ function caricaOPulisciPerData(){
   document.getElementById('g_not').value = r.glicemiaNotte ?? '';
   document.getElementById('i_not').value = r.insulinaNotte ?? '';
 
+  modificaSbloccata = false;
+  setCampiBloccati(true);
   aggiornaTutteLeDosi();
-  msg('Giornata caricata.');
+  msg('Giornata caricata in sola lettura.');
 }
 
 function datiForm(){
@@ -678,8 +709,17 @@ function salvaGiornata(){
     if (idx === -1){
       const nuovo = { ...record };
       setData([nuovo, ...dati].sort((a,b) => b.data.localeCompare(a.data)));
+
+      modificaSbloccata = false;
+      setCampiBloccati(true);
+
       msg('Nuova giornata salvata.');
       render();
+      return;
+    }
+
+    if (!modificaSbloccata){
+      msg('Giornata già salvata: premi "Sblocca modifica" per modificarla.', false);
       return;
     }
 
@@ -729,6 +769,10 @@ function salvaGiornata(){
 
     dati[idx] = aggiornato;
     setData(dati.sort((a,b) => b.data.localeCompare(a.data)));
+
+    modificaSbloccata = false;
+    setCampiBloccati(true);
+
     msg('Giornata aggiornata correttamente.');
     render();
   } finally {
@@ -740,9 +784,14 @@ function salvaGiornata(){
 function eliminaGiornata(data){
   const conferma = confirm(`Vuoi eliminare la giornata ${data}?`);
   if (!conferma) return;
+
   setData(getData().filter(r => r.data !== data));
   render();
-  if (document.getElementById('data').value === data) pulisciCampi();
+
+  if (document.getElementById('data').value === data){
+    pulisciCampi();
+  }
+
   msg('Giornata eliminata.');
 }
 
