@@ -8,10 +8,10 @@
   <style>
     :root{
       --bg:#efefef;
-      --card:#ffffff;
       --blue:#3b82f6;
-      --blue-soft:#d7ecfb;
       --sand:#f3dfc4;
+      --violet:#e5dcf9;
+      --night:#dde7f5;
       --green:#0f766e;
       --text:#111827;
       --muted:#6b7280;
@@ -19,38 +19,31 @@
       --danger:#dc2626;
       --danger-bg:#fee2e2;
       --ok:#16a34a;
-      --radius:22px;
       --shadow:0 10px 24px rgba(0,0,0,.08);
     }
-
     *{box-sizing:border-box}
-
     body{
       margin:0;
       font-family:Arial, Helvetica, sans-serif;
       background:var(--bg);
       color:var(--text);
     }
-
     .app{
-      max-width:470px;
+      max-width:520px;
       margin:0 auto;
       padding:16px 14px 28px;
     }
-
     .title{
       text-align:center;
       font-size:28px;
       font-weight:800;
       margin:8px 0 18px;
     }
-
     .topbar{
       display:flex;
       gap:10px;
       margin-bottom:12px;
     }
-
     .topbar button{
       flex:1;
       min-height:52px;
@@ -63,11 +56,9 @@
       box-shadow:var(--shadow);
       cursor:pointer;
     }
-
     .datebox{
       margin-bottom:14px;
     }
-
     .datebox input{
       width:100%;
       min-height:54px;
@@ -77,28 +68,25 @@
       font-size:18px;
       background:#fff;
     }
-
     .card{
       border-radius:24px;
       padding:18px 16px 16px;
       margin-bottom:16px;
       box-shadow:var(--shadow);
     }
-
     .card-colazione{ background:#cfe7f7; }
     .card-pranzo{ background:#f3e1c8; }
-    .card-cena{ background:#e5dcf9; }
-
+    .card-cena{ background:#e7ddfa; }
+    .card-notte{ background:#dde7f5; }
     .meal-title{
       font-size:24px;
       font-weight:800;
       margin:0 0 16px;
     }
-
     .field{
       width:100%;
       min-height:56px;
-      border:3px solid #2e2e2e20;
+      border:3px solid rgba(46,46,46,.12);
       border-radius:16px;
       padding:10px 14px;
       font-size:18px;
@@ -106,31 +94,26 @@
       outline:none;
       margin-bottom:10px;
     }
-
     .field:focus{
       border-color:#3b82f6;
       box-shadow:0 0 0 4px rgba(59,130,246,.12);
     }
-
     .dose{
       font-size:19px;
       font-weight:800;
       color:var(--green);
       margin:4px 0 10px;
     }
-
     .dose small{
       font-weight:700;
-      opacity:.9;
+      opacity:.95;
     }
-
     .section-actions{
       display:grid;
       grid-template-columns:1fr 1fr;
       gap:10px;
       margin:14px 0;
     }
-
     .btn{
       min-height:48px;
       border:none;
@@ -140,32 +123,14 @@
       font-weight:800;
       cursor:pointer;
     }
-
-    .btn-primary{
-      background:var(--blue);
-      color:#fff;
-    }
-
-    .btn-soft{
-      background:#dbeafe;
-      color:#1d4ed8;
-    }
-
-    .btn-danger{
-      background:var(--danger-bg);
-      color:#991b1b;
-    }
-
-    .btn-gray{
-      background:#e5e7eb;
-      color:#111827;
-    }
-
+    .btn-primary{ background:var(--blue); color:#fff; }
+    .btn-soft{ background:#dbeafe; color:#1d4ed8; }
+    .btn-danger{ background:var(--danger-bg); color:#991b1b; }
+    .btn-gray{ background:#e5e7eb; color:#111827; }
     .btn:disabled{
       opacity:.6;
       cursor:not-allowed;
     }
-
     .message{
       min-height:22px;
       font-size:14px;
@@ -173,7 +138,12 @@
       margin:8px 2px 12px;
       color:var(--ok);
     }
-
+    .note{
+      font-size:13px;
+      color:var(--muted);
+      margin-top:6px;
+      line-height:1.35;
+    }
     .panel{
       background:#fff;
       border-radius:22px;
@@ -181,37 +151,31 @@
       padding:16px;
       margin-top:16px;
     }
-
     .panel h2{
       margin:0 0 12px;
       font-size:20px;
     }
-
     .summary{
       display:grid;
       grid-template-columns:1fr 1fr;
       gap:10px;
       margin-bottom:12px;
     }
-
     .summary-box{
       background:#f9fafb;
       border:1px solid #e5e7eb;
       border-radius:16px;
       padding:12px;
     }
-
     .summary-box span{
       display:block;
       color:var(--muted);
       font-size:13px;
       margin-bottom:4px;
     }
-
     .summary-box strong{
       font-size:20px;
     }
-
     .table-wrap{
       overflow:auto;
       border:1px solid #e5e7eb;
@@ -219,13 +183,11 @@
       margin-top:10px;
       background:#fff;
     }
-
     table{
       width:100%;
       border-collapse:collapse;
-      min-width:640px;
+      min-width:980px;
     }
-
     th, td{
       text-align:left;
       padding:10px 8px;
@@ -233,11 +195,9 @@
       font-size:14px;
       vertical-align:middle;
     }
-
     th{
       background:#f9fafb;
     }
-
     .small-btn{
       min-height:34px;
       padding:6px 10px;
@@ -248,25 +208,11 @@
       cursor:pointer;
       margin-right:6px;
     }
-
-    .tag{
-      display:inline-block;
-      border-radius:999px;
-      padding:5px 10px;
-      font-size:12px;
-      font-weight:800;
-    }
-
-    .tag-low{ background:#dbeafe; color:#1d4ed8; }
-    .tag-ok{ background:#dcfce7; color:#166534; }
-    .tag-high{ background:#fef3c7; color:#92400e; }
-
     .empty{
       padding:18px;
       text-align:center;
       color:var(--muted);
     }
-
     .modal-backdrop{
       position:fixed;
       inset:0;
@@ -277,9 +223,8 @@
       padding:16px;
       z-index:1000;
     }
-
     .modal{
-      width:min(760px, 100%);
+      width:min(860px, 100%);
       max-height:88vh;
       overflow:auto;
       background:#fff;
@@ -287,11 +232,6 @@
       box-shadow:0 20px 50px rgba(0,0,0,.25);
       padding:18px;
     }
-
-    .modal h2{
-      margin:0 0 10px;
-    }
-
     .modal-top{
       display:flex;
       justify-content:space-between;
@@ -299,7 +239,6 @@
       gap:10px;
       margin-bottom:12px;
     }
-
     .schema-input{
       width:100%;
       min-height:42px;
@@ -308,10 +247,7 @@
       padding:8px 10px;
       font-size:15px;
     }
-
-    .hidden{
-      display:none !important;
-    }
+    .hidden{ display:none !important; }
   </style>
 </head>
 <body>
@@ -334,32 +270,47 @@
 
     <div class="card card-colazione">
       <div class="meal-title">🌅 Colazione</div>
-      <input id="g_col" class="field" type="number" inputmode="decimal" placeholder="Glicemia" />
+      <input id="g_col" class="field" type="number" inputmode="decimal" placeholder="Glicemia colazione" />
       <div id="dose_col" class="dose">💉 <small>Dose consigliata:</small> -</div>
-      <input id="i_col" class="field" type="number" inputmode="decimal" placeholder="Insulina reale" />
+      <input id="i_col" class="field" type="number" inputmode="decimal" placeholder="Insulina colazione" />
+      <input id="g_col_post" class="field" type="number" inputmode="decimal" placeholder="Glicemia dopo colazione" />
     </div>
 
     <div class="card card-pranzo">
       <div class="meal-title">🌞 Pranzo</div>
-      <input id="g_pra" class="field" type="number" inputmode="decimal" placeholder="Glicemia" />
+      <input id="g_pra" class="field" type="number" inputmode="decimal" placeholder="Glicemia pranzo" />
       <div id="dose_pra" class="dose">💉 <small>Dose consigliata:</small> -</div>
-      <input id="i_pra" class="field" type="number" inputmode="decimal" placeholder="Insulina reale" />
+      <input id="i_pra" class="field" type="number" inputmode="decimal" placeholder="Insulina pranzo" />
+      <input id="g_pra_post" class="field" type="number" inputmode="decimal" placeholder="Glicemia dopo pranzo" />
     </div>
 
     <div class="card card-cena">
       <div class="meal-title">🌙 Cena</div>
-      <input id="g_cen" class="field" type="number" inputmode="decimal" placeholder="Glicemia" />
+      <input id="g_cen" class="field" type="number" inputmode="decimal" placeholder="Glicemia cena" />
       <div id="dose_cen" class="dose">💉 <small>Dose consigliata:</small> -</div>
-      <input id="i_cen" class="field" type="number" inputmode="decimal" placeholder="Insulina reale" />
+      <input id="i_cen" class="field" type="number" inputmode="decimal" placeholder="Insulina cena" />
+      <input id="g_cen_post" class="field" type="number" inputmode="decimal" placeholder="Glicemia dopo cena" />
+    </div>
+
+    <div class="card card-notte">
+      <div class="meal-title">🌌 Notte</div>
+      <input id="g_not" class="field" type="number" inputmode="decimal" placeholder="Glicemia notte" />
+      <div id="dose_not" class="dose">💉 <small>Dose consigliata:</small> -</div>
+      <input id="i_not" class="field" type="number" inputmode="decimal" placeholder="Insulina notte" />
     </div>
 
     <div class="section-actions">
-      <button id="btnSalva" class="btn btn-primary" onclick="aggiungiGiornata()">Salva giornata</button>
+      <button id="btnSalva" class="btn btn-primary" onclick="salvaGiornata()">Salva giornata</button>
       <button class="btn btn-soft" onclick="pulisciCampi()">Pulisci campi</button>
       <button class="btn btn-soft" onclick="esportaCSV()">Esporta CSV</button>
       <button class="btn btn-soft" onclick="creaBackupJSON()">Backup JSON</button>
       <button class="btn btn-soft" onclick="document.getElementById('fileRipristino').click()">Ripristina backup</button>
       <button class="btn btn-danger" onclick="svuotaTutto()">Svuota tutto</button>
+    </div>
+
+    <div class="note">
+      Lasciare un campo vuoto non cancella il valore già salvato.<br>
+      Per azzerare un valore, scrivi <strong>0</strong> e poi premi <strong>Salva giornata</strong>.
     </div>
 
     <input
@@ -381,11 +332,11 @@
           <strong id="mediaG">-</strong>
         </div>
         <div class="summary-box">
-          <span>Totale insulina reale</span>
+          <span>Totale insulina</span>
           <strong id="totaleI">-</strong>
         </div>
         <div class="summary-box">
-          <span>Registrazioni</span>
+          <span>Giorni registrati</span>
           <strong id="numR">0</strong>
         </div>
         <div class="summary-box">
@@ -400,33 +351,38 @@
           <thead>
             <tr>
               <th>Data</th>
-              <th>Colazione</th>
-              <th>Pranzo</th>
-              <th>Cena</th>
-              <th>Insulina totale</th>
-              <th>Media insulina giornaliera</th>
+              <th>Glic. col.</th>
+              <th>Ins. col.</th>
+              <th>Dopo col.</th>
+              <th>Glic. pranzo</th>
+              <th>Ins. pranzo</th>
+              <th>Dopo pranzo</th>
+              <th>Glic. cena</th>
+              <th>Ins. cena</th>
+              <th>Dopo cena</th>
+              <th>Glic. notte</th>
+              <th>Ins. notte</th>
             </tr>
           </thead>
           <tbody id="tbodyDaily"></tbody>
         </table>
       </div>
 
-      <h2 style="margin-top:16px;">Tabella dettagliata</h2>
+      <h2 style="margin-top:16px;">Dettaglio dose consigliata</h2>
       <div class="table-wrap">
         <table>
           <thead>
             <tr>
               <th>Data</th>
-              <th>Pasto</th>
-              <th>Glicemia</th>
-              <th>Livello</th>
-              <th>Dose consigliata</th>
-              <th>Insulina reale</th>
-              <th>Nota</th>
+              <th>Dose colazione</th>
+              <th>Dose pranzo</th>
+              <th>Dose cena</th>
+              <th>Dose notte</th>
+              <th>Insulina notte</th>
               <th>Azioni</th>
             </tr>
           </thead>
-          <tbody id="tbody"></tbody>
+          <tbody id="tbodyDosi"></tbody>
         </table>
       </div>
     </div>
@@ -440,7 +396,7 @@
       </div>
 
       <p style="margin-top:0;color:#6b7280;">
-        Qui cambi le fasce glicemia e le dosi consigliate senza toccare il codice.
+        Modifica qui le fasce glicemia e le dosi consigliate per colazione, pranzo, cena e notte.
       </p>
 
       <div class="table-wrap">
@@ -452,6 +408,7 @@
               <th>Colazione</th>
               <th>Pranzo</th>
               <th>Cena</th>
+              <th>Notte</th>
               <th>Azione</th>
             </tr>
           </thead>
@@ -468,19 +425,18 @@
   </div>
 
 <script>
-const KEY = 'glicemia_app_pro_v2';
-const KEY_SCHEMA = 'glicemia_schema_dottoressa_v1';
+const KEY = 'glicemia_diario_completo_v3';
+const KEY_SCHEMA = 'glicemia_schema_dottoressa_v4';
 
-let editId = null;
 let salvataggioInCorso = false;
 
 const SCHEMA_DEFAULT = [
-  { min: 80,  max: 120, col: 5,  pra: 6,  cen: 5 },
-  { min: 120, max: 160, col: 6,  pra: 7,  cen: 6 },
-  { min: 160, max: 200, col: 7,  pra: 8,  cen: 7 },
-  { min: 200, max: 240, col: 8,  pra: 9,  cen: 8 },
-  { min: 240, max: 280, col: 9,  pra: 10, cen: 9 },
-  { min: 280, max: 320, col: 10, pra: 11, cen: 10 }
+  { min: 80,  max: 120, col: 5,  pra: 6,  cen: 5,  not: 5 },
+  { min: 120, max: 160, col: 6,  pra: 7,  cen: 6,  not: 6 },
+  { min: 160, max: 200, col: 7,  pra: 8,  cen: 7,  not: 7 },
+  { min: 200, max: 240, col: 8,  pra: 9,  cen: 8,  not: 8 },
+  { min: 240, max: 280, col: 9,  pra: 10, cen: 9,  not: 9 },
+  { min: 280, max: 320, col: 10, pra: 11, cen: 10, not: 10 }
 ];
 
 function oggi(){
@@ -536,15 +492,7 @@ function msg(t, ok=true){
   }, 2600);
 }
 
-function livelloGlicemia(value){
-  const v = Number(value);
-  if (Number.isNaN(v)) return '<span class="tag">-</span>';
-  if (v < 80) return '<span class="tag tag-low">Bassa</span>';
-  if (v <= 130) return '<span class="tag tag-ok">Ok</span>';
-  return '<span class="tag tag-high">Alta</span>';
-}
-
-function calcolaInsulina(glicemia, pasto){
+function calcolaInsulina(glicemia, tipo){
   const g = Number(glicemia);
   if (Number.isNaN(g)) return '';
 
@@ -552,15 +500,25 @@ function calcolaInsulina(glicemia, pasto){
   const fascia = schema.find(f => g >= Number(f.min) && g <= Number(f.max));
   if (!fascia) return '';
 
-  if (pasto === 'col') return fascia.col;
-  if (pasto === 'pra') return fascia.pra;
-  if (pasto === 'cen') return fascia.cen;
+  if (tipo === 'col') return fascia.col;
+  if (tipo === 'pra') return fascia.pra;
+  if (tipo === 'cen') return fascia.cen;
+  if (tipo === 'not') return fascia.not;
   return '';
 }
 
-function aggiornaDoseElemento(inputId, doseId, pasto){
+function aggiornataDose(glicemia, tipo, doseVecchia){
+  if (glicemia === '' || glicemia === null || glicemia === undefined){
+    return doseVecchia || '';
+  }
+
+  const dose = calcolaInsulina(glicemia, tipo);
+  return dose !== '' ? dose : (doseVecchia || '');
+}
+
+function aggiornaDoseElemento(inputId, doseId, tipo){
   const glicemia = document.getElementById(inputId).value;
-  const dose = calcolaInsulina(glicemia, pasto);
+  const dose = calcolaInsulina(glicemia, tipo);
   document.getElementById(doseId).innerText = dose
     ? `💉 Dose consigliata: ${dose} U`
     : '💉 Dose consigliata: -';
@@ -570,47 +528,63 @@ function aggiornaTutteLeDosi(){
   aggiornaDoseElemento('g_col', 'dose_col', 'col');
   aggiornaDoseElemento('g_pra', 'dose_pra', 'pra');
   aggiornaDoseElemento('g_cen', 'dose_cen', 'cen');
-}
-
-function campi(){
-  return {
-    data: document.getElementById('data').value,
-    pasti: [
-      {
-        pasto: 'Colazione',
-        glicemia: document.getElementById('g_col').value.trim(),
-        insulinaReale: document.getElementById('i_col').value.trim(),
-        doseConsigliata: calcolaInsulina(document.getElementById('g_col').value.trim(), 'col')
-      },
-      {
-        pasto: 'Pranzo',
-        glicemia: document.getElementById('g_pra').value.trim(),
-        insulinaReale: document.getElementById('i_pra').value.trim(),
-        doseConsigliata: calcolaInsulina(document.getElementById('g_pra').value.trim(), 'pra')
-      },
-      {
-        pasto: 'Cena',
-        glicemia: document.getElementById('g_cen').value.trim(),
-        insulinaReale: document.getElementById('i_cen').value.trim(),
-        doseConsigliata: calcolaInsulina(document.getElementById('g_cen').value.trim(), 'cen')
-      }
-    ]
-  };
+  aggiornaDoseElemento('g_not', 'dose_not', 'not');
 }
 
 function pulisciCampi(){
   document.getElementById('g_col').value = '';
   document.getElementById('i_col').value = '';
+  document.getElementById('g_col_post').value = '';
+
   document.getElementById('g_pra').value = '';
   document.getElementById('i_pra').value = '';
+  document.getElementById('g_pra_post').value = '';
+
   document.getElementById('g_cen').value = '';
   document.getElementById('i_cen').value = '';
-  editId = null;
-  nascondiPulsanteSalva();
+  document.getElementById('g_cen_post').value = '';
+
+  document.getElementById('g_not').value = '';
+  document.getElementById('i_not').value = '';
+
   aggiornaTutteLeDosi();
 }
 
-function aggiungiGiornata(){
+function datiForm(){
+  const gCol = document.getElementById('g_col').value.trim();
+  const gPra = document.getElementById('g_pra').value.trim();
+  const gCen = document.getElementById('g_cen').value.trim();
+  const gNot = document.getElementById('g_not').value.trim();
+
+  return {
+    data: document.getElementById('data').value,
+    glicemiaColazione: gCol,
+    insulinaColazione: document.getElementById('i_col').value.trim(),
+    glicemiaDopoColazione: document.getElementById('g_col_post').value.trim(),
+
+    glicemiaPranzo: gPra,
+    insulinaPranzo: document.getElementById('i_pra').value.trim(),
+    glicemiaDopoPranzo: document.getElementById('g_pra_post').value.trim(),
+
+    glicemiaCena: gCen,
+    insulinaCena: document.getElementById('i_cen').value.trim(),
+    glicemiaDopoCena: document.getElementById('g_cen_post').value.trim(),
+
+    glicemiaNotte: gNot,
+    insulinaNotte: document.getElementById('i_not').value.trim(),
+
+    doseConsigliataColazione: calcolaInsulina(gCol, 'col'),
+    doseConsigliataPranzo: calcolaInsulina(gPra, 'pra'),
+    doseConsigliataCena: calcolaInsulina(gCen, 'cen'),
+    doseConsigliataNotte: calcolaInsulina(gNot, 'not')
+  };
+}
+
+function almenoUnValore(record){
+  return Object.entries(record).some(([k,v]) => k !== 'data' && v !== '');
+}
+
+function salvaGiornata(){
   if (salvataggioInCorso) return;
 
   salvataggioInCorso = true;
@@ -618,160 +592,101 @@ function aggiungiGiornata(){
   btn.disabled = true;
 
   try{
-    const c = campi();
+    const record = datiForm();
 
-    if (!c.data){
+    if (!record.data){
       msg('Inserisci la data.', false);
       return;
     }
 
-    const nuoviPasti = c.pasti.filter(r => r.glicemia !== '' || r.insulinaReale !== '');
-
-    if (!nuoviPasti.length){
+    if (!almenoUnValore(record)){
       msg('Inserisci almeno un valore.', false);
       return;
     }
 
     const dati = getData();
+    const idx = dati.findIndex(r => r.data === record.data);
 
-    for (const r of nuoviPasti){
-      const duplicato = dati.some(x =>
-        x.data === c.data &&
-        x.pasto === r.pasto &&
-        x.id !== editId
-      );
-
-      if (duplicato){
-        msg(`Esiste già una registrazione per ${r.pasto} in questa data.`, false);
-        return;
-      }
+    if (idx === -1){
+      setData([record, ...dati].sort((a,b) => b.data.localeCompare(a.data)));
+      pulisciCampi();
+      render();
+      msg('Nuova giornata salvata.');
+      return;
     }
 
-    const righeNuove = nuoviPasti.map(r => ({
-      id: crypto.randomUUID ? crypto.randomUUID() : String(Date.now() + Math.random()),
-      data: c.data,
-      pasto: r.pasto,
-      glicemia: r.glicemia,
-      doseConsigliata: r.doseConsigliata,
-      insulinaReale: r.insulinaReale,
-      nota: ''
-    }));
+    const esistente = dati[idx];
 
-    setData([...righeNuove, ...dati]);
+    const aggiornato = {
+      ...esistente,
+      data: record.data,
+
+      glicemiaColazione: record.glicemiaColazione !== '' ? record.glicemiaColazione : esistente.glicemiaColazione,
+      insulinaColazione: record.insulinaColazione !== '' ? record.insulinaColazione : esistente.insulinaColazione,
+      glicemiaDopoColazione: record.glicemiaDopoColazione !== '' ? record.glicemiaDopoColazione : esistente.glicemiaDopoColazione,
+
+      glicemiaPranzo: record.glicemiaPranzo !== '' ? record.glicemiaPranzo : esistente.glicemiaPranzo,
+      insulinaPranzo: record.insulinaPranzo !== '' ? record.insulinaPranzo : esistente.insulinaPranzo,
+      glicemiaDopoPranzo: record.glicemiaDopoPranzo !== '' ? record.glicemiaDopoPranzo : esistente.glicemiaDopoPranzo,
+
+      glicemiaCena: record.glicemiaCena !== '' ? record.glicemiaCena : esistente.glicemiaCena,
+      insulinaCena: record.insulinaCena !== '' ? record.insulinaCena : esistente.insulinaCena,
+      glicemiaDopoCena: record.glicemiaDopoCena !== '' ? record.glicemiaDopoCena : esistente.glicemiaDopoCena,
+
+      glicemiaNotte: record.glicemiaNotte !== '' ? record.glicemiaNotte : esistente.glicemiaNotte,
+      insulinaNotte: record.insulinaNotte !== '' ? record.insulinaNotte : esistente.insulinaNotte
+    };
+
+    aggiornato.doseConsigliataColazione = aggiornataDose(aggiornato.glicemiaColazione, 'col', esistente.doseConsigliataColazione);
+    aggiornato.doseConsigliataPranzo = aggiornataDose(aggiornato.glicemiaPranzo, 'pra', esistente.doseConsigliataPranzo);
+    aggiornato.doseConsigliataCena = aggiornataDose(aggiornato.glicemiaCena, 'cen', esistente.doseConsigliataCena);
+    aggiornato.doseConsigliataNotte = aggiornataDose(aggiornato.glicemiaNotte, 'not', esistente.doseConsigliataNotte);
+
+    dati[idx] = aggiornato;
+
+    setData(dati.sort((a,b) => b.data.localeCompare(a.data)));
     pulisciCampi();
     render();
-    msg('Registrazione salvata correttamente.');
+    msg('Giornata aggiornata correttamente.');
   } finally {
     salvataggioInCorso = false;
     btn.disabled = false;
   }
 }
 
-function mostraPulsanteSalva(){
-  let b = document.getElementById('btnSaveEdit');
-  if (!b){
-    b = document.createElement('button');
-    b.id = 'btnSaveEdit';
-    b.className = 'btn btn-primary';
-    b.textContent = 'Salva modifica';
-    b.onclick = salvaModifica;
-    document.querySelector('.section-actions').prepend(b);
-  }
-}
-
-function nascondiPulsanteSalva(){
-  const b = document.getElementById('btnSaveEdit');
-  if (b) b.remove();
-}
-
-function modificaRiga(id){
-  const r = getData().find(x => x.id === id);
+function caricaGiornata(data){
+  const r = getData().find(x => x.data === data);
   if (!r) return;
 
   document.getElementById('data').value = r.data || oggi();
 
-  document.getElementById('g_col').value = '';
-  document.getElementById('i_col').value = '';
-  document.getElementById('g_pra').value = '';
-  document.getElementById('i_pra').value = '';
-  document.getElementById('g_cen').value = '';
-  document.getElementById('i_cen').value = '';
+  document.getElementById('g_col').value = r.glicemiaColazione || '';
+  document.getElementById('i_col').value = r.insulinaColazione || '';
+  document.getElementById('g_col_post').value = r.glicemiaDopoColazione || '';
 
-  if (r.pasto === 'Colazione'){
-    document.getElementById('g_col').value = r.glicemia || '';
-    document.getElementById('i_col').value = r.insulinaReale || '';
-  }
-  if (r.pasto === 'Pranzo'){
-    document.getElementById('g_pra').value = r.glicemia || '';
-    document.getElementById('i_pra').value = r.insulinaReale || '';
-  }
-  if (r.pasto === 'Cena'){
-    document.getElementById('g_cen').value = r.glicemia || '';
-    document.getElementById('i_cen').value = r.insulinaReale || '';
-  }
+  document.getElementById('g_pra').value = r.glicemiaPranzo || '';
+  document.getElementById('i_pra').value = r.insulinaPranzo || '';
+  document.getElementById('g_pra_post').value = r.glicemiaDopoPranzo || '';
 
-  editId = id;
-  mostraPulsanteSalva();
+  document.getElementById('g_cen').value = r.glicemiaCena || '';
+  document.getElementById('i_cen').value = r.insulinaCena || '';
+  document.getElementById('g_cen_post').value = r.glicemiaDopoCena || '';
+
+  document.getElementById('g_not').value = r.glicemiaNotte || '';
+  document.getElementById('i_not').value = r.insulinaNotte || '';
+
   aggiornaTutteLeDosi();
   window.scrollTo({ top: 0, behavior: 'smooth' });
-  msg('Modalità modifica attiva.');
+  msg('Giornata caricata nei campi.');
 }
 
-function salvaModifica(){
-  if (!editId){
-    msg('Nessuna riga in modifica.', false);
-    return;
-  }
+function eliminaGiornata(data){
+  const conferma = confirm(`Vuoi eliminare la giornata ${data}?`);
+  if (!conferma) return;
 
-  const c = campi();
-  const daScrivere = c.pasti.filter(r => r.glicemia !== '' || r.insulinaReale !== '');
-
-  if (daScrivere.length !== 1){
-    msg('Per modificare, compila solo il pasto della riga scelta.', false);
-    return;
-  }
-
-  const dati = getData();
-  const idx = dati.findIndex(r => r.id === editId);
-
-  if (idx === -1){
-    msg('Riga non trovata.', false);
-    return;
-  }
-
-  const duplicato = dati.some(r =>
-    r.id !== editId &&
-    r.data === c.data &&
-    r.pasto === daScrivere[0].pasto
-  );
-
-  if (duplicato){
-    msg('Esiste già una registrazione per questo giorno e questo pasto.', false);
-    return;
-  }
-
-  dati[idx] = {
-    ...dati[idx],
-    data: c.data,
-    pasto: daScrivere[0].pasto,
-    glicemia: daScrivere[0].glicemia,
-    doseConsigliata: daScrivere[0].doseConsigliata,
-    insulinaReale: daScrivere[0].insulinaReale
-  };
-
-  setData(dati);
-  editId = null;
-  nascondiPulsanteSalva();
-  pulisciCampi();
+  setData(getData().filter(r => r.data !== data));
   render();
-  msg('Modifica salvata.');
-}
-
-function eliminaRiga(id){
-  const dati = getData().filter(r => r.id !== id);
-  setData(dati);
-  render();
-  msg('Riga eliminata.');
+  msg('Giornata eliminata.');
 }
 
 function svuotaTutto(){
@@ -784,35 +699,6 @@ function svuotaTutto(){
   msg('Tutti i dati sono stati cancellati.');
 }
 
-function raggruppaPerGiorno(dati){
-  const gruppi = {};
-
-  dati.forEach(r => {
-    if (!gruppi[r.data]){
-      gruppi[r.data] = {
-        data: r.data,
-        colazione: '',
-        pranzo: '',
-        cena: '',
-        insulinaTotale: 0,
-        contaInsulina: 0
-      };
-    }
-
-    if (r.pasto === 'Colazione') gruppi[r.data].colazione = r.glicemia || '';
-    if (r.pasto === 'Pranzo') gruppi[r.data].pranzo = r.glicemia || '';
-    if (r.pasto === 'Cena') gruppi[r.data].cena = r.glicemia || '';
-
-    const ins = Number(r.insulinaReale);
-    if (!Number.isNaN(ins) && r.insulinaReale !== ''){
-      gruppi[r.data].insulinaTotale += ins;
-      gruppi[r.data].contaInsulina += 1;
-    }
-  });
-
-  return Object.values(gruppi).sort((a,b) => a.data.localeCompare(b.data));
-}
-
 function esportaCSV(){
   const dati = getData();
 
@@ -821,28 +707,46 @@ function esportaCSV(){
     return;
   }
 
-  const giornalieri = raggruppaPerGiorno(dati);
-  const rows = [
-    ['Data','Colazione','Pranzo','Cena','Insulina totale','Media insulina giornaliera']
-  ];
+  const rows = [[
+    'Data',
+    'Glicemia colazione',
+    'Insulina colazione',
+    'Glicemia dopo colazione',
+    'Glicemia pranzo',
+    'Insulina pranzo',
+    'Glicemia dopo pranzo',
+    'Glicemia cena',
+    'Insulina cena',
+    'Glicemia dopo cena',
+    'Glicemia notte',
+    'Insulina notte'
+  ]];
 
-  giornalieri.forEach(g => {
-    const media = g.contaInsulina > 0 ? (g.insulinaTotale / g.contaInsulina).toFixed(1) : '';
-    rows.push([
-      g.data,
-      g.colazione,
-      g.pranzo,
-      g.cena,
-      g.insulinaTotale ? g.insulinaTotale.toFixed(1) : '',
-      media
-    ]);
-  });
+  dati
+    .slice()
+    .sort((a,b) => a.data.localeCompare(b.data))
+    .forEach(r => {
+      rows.push([
+        r.data || '',
+        r.glicemiaColazione || '',
+        r.insulinaColazione || '',
+        r.glicemiaDopoColazione || '',
+        r.glicemiaPranzo || '',
+        r.insulinaPranzo || '',
+        r.glicemiaDopoPranzo || '',
+        r.glicemiaCena || '',
+        r.insulinaCena || '',
+        r.glicemiaDopoCena || '',
+        r.glicemiaNotte || '',
+        r.insulinaNotte || ''
+      ]);
+    });
 
   const csv = rows
     .map(r => r.map(v => `"${String(v).replaceAll('"','""')}"`).join(';'))
     .join('\n');
 
-  downloadBlob(new Blob([csv], { type:'text/csv;charset=utf-8;' }), 'registro_glicemia_giornaliero.csv');
+  downloadBlob(new Blob([csv], { type:'text/csv;charset=utf-8;' }), 'diario_glicemie.csv');
   msg('CSV esportato.');
 }
 
@@ -853,7 +757,10 @@ function creaBackupJSON(){
     return;
   }
 
-  downloadBlob(new Blob([JSON.stringify(dati, null, 2)], { type:'application/json' }), 'backup_glicemia_insulina.json');
+  downloadBlob(
+    new Blob([JSON.stringify(dati, null, 2)], { type:'application/json' }),
+    'backup_glicemie.json'
+  );
   msg('Backup creato.');
 }
 
@@ -897,30 +804,14 @@ Inserisci 1 oppure 2`
         setData(datiImportati);
         render();
         msg('Backup ripristinato.');
-      }
-      else if (scelta === '2'){
+      } else if (scelta === '2'){
         const datiAttuali = getData();
-        const nuovi = [];
-
-        datiImportati.forEach(nuovo => {
-          const duplicato = datiAttuali.some(esistente =>
-            esistente.data === nuovo.data &&
-            esistente.pasto === nuovo.pasto
-          );
-
-          if (!duplicato){
-            nuovi.push({
-              ...nuovo,
-              id: crypto.randomUUID ? crypto.randomUUID() : String(Date.now() + Math.random())
-            });
-          }
-        });
-
-        setData([...nuovi, ...datiAttuali]);
+        const nuoveDate = new Set(datiAttuali.map(r => r.data));
+        const nuovi = datiImportati.filter(r => !nuoveDate.has(r.data));
+        setData([...nuovi, ...datiAttuali].sort((a,b) => b.data.localeCompare(a.data)));
         render();
         msg(`Unione completata: aggiunti ${nuovi.length} record.`);
-      }
-      else{
+      } else {
         msg('Scelta non valida.', false);
       }
     } catch(err){
@@ -944,18 +835,43 @@ function downloadBlob(blob, filename){
   URL.revokeObjectURL(url);
 }
 
+function mediaNumerica(valori){
+  const nums = valori.map(v => Number(v)).filter(v => !Number.isNaN(v));
+  if (!nums.length) return '-';
+  return (nums.reduce((a,b) => a+b, 0) / nums.length).toFixed(1);
+}
+
+function sommaNumerica(valori){
+  const nums = valori.map(v => Number(v)).filter(v => !Number.isNaN(v));
+  if (!nums.length) return '-';
+  return nums.reduce((a,b) => a+b, 0).toFixed(1);
+}
+
 function aggiornaRiepilogo(dati){
-  const glicemie = dati.map(r => Number(r.glicemia)).filter(v => !Number.isNaN(v) && v > 0);
-  const insuline = dati.map(r => Number(r.insulinaReale)).filter(v => !Number.isNaN(v) && v >= 0);
+  const tutteGlicemie = [];
+  const tutteInsuline = [];
 
-  document.getElementById('mediaG').textContent = glicemie.length
-    ? (glicemie.reduce((a,b) => a+b, 0) / glicemie.length).toFixed(1)
-    : '-';
+  dati.forEach(r => {
+    [
+      r.glicemiaColazione,
+      r.glicemiaDopoColazione,
+      r.glicemiaPranzo,
+      r.glicemiaDopoPranzo,
+      r.glicemiaCena,
+      r.glicemiaDopoCena,
+      r.glicemiaNotte
+    ].forEach(v => tutteGlicemie.push(v));
 
-  document.getElementById('totaleI').textContent = insuline.length
-    ? insuline.reduce((a,b) => a+b, 0).toFixed(1)
-    : '-';
+    [
+      r.insulinaColazione,
+      r.insulinaPranzo,
+      r.insulinaCena,
+      r.insulinaNotte
+    ].forEach(v => tutteInsuline.push(v));
+  });
 
+  document.getElementById('mediaG').textContent = mediaNumerica(tutteGlicemie);
+  document.getElementById('totaleI').textContent = sommaNumerica(tutteInsuline);
   document.getElementById('numR').textContent = dati.length;
   document.getElementById('ultimaData').textContent = dati.length ? dati[0].data : '-';
 }
@@ -964,61 +880,69 @@ function renderTabellaGiornaliera(dati){
   const tbody = document.getElementById('tbodyDaily');
   tbody.innerHTML = '';
 
-  const giornalieri = raggruppaPerGiorno(dati);
-
-  if (!giornalieri.length){
-    tbody.innerHTML = '<tr><td colspan="6" class="empty">Nessun dato giornaliero.</td></tr>';
+  if (!dati.length){
+    tbody.innerHTML = '<tr><td colspan="12" class="empty">Nessun dato giornaliero.</td></tr>';
     return;
   }
 
-  giornalieri.forEach(g => {
-    const media = g.contaInsulina > 0 ? (g.insulinaTotale / g.contaInsulina).toFixed(1) : '-';
-    const tr = document.createElement('tr');
-    tr.innerHTML = `
-      <td>${g.data || '-'}</td>
-      <td>${g.colazione || '-'}</td>
-      <td>${g.pranzo || '-'}</td>
-      <td>${g.cena || '-'}</td>
-      <td>${g.contaInsulina > 0 ? g.insulinaTotale.toFixed(1) : '-'}</td>
-      <td>${media}</td>
-    `;
-    tbody.appendChild(tr);
-  });
+  dati
+    .slice()
+    .sort((a,b) => b.data.localeCompare(a.data))
+    .forEach(r => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td>${r.data || '-'}</td>
+        <td>${r.glicemiaColazione || '-'}</td>
+        <td>${r.insulinaColazione || '-'}</td>
+        <td>${r.glicemiaDopoColazione || '-'}</td>
+        <td>${r.glicemiaPranzo || '-'}</td>
+        <td>${r.insulinaPranzo || '-'}</td>
+        <td>${r.glicemiaDopoPranzo || '-'}</td>
+        <td>${r.glicemiaCena || '-'}</td>
+        <td>${r.insulinaCena || '-'}</td>
+        <td>${r.glicemiaDopoCena || '-'}</td>
+        <td>${r.glicemiaNotte || '-'}</td>
+        <td>${r.insulinaNotte || '-'}</td>
+      `;
+      tbody.appendChild(tr);
+    });
 }
 
-function renderTabellaDettagliata(dati){
-  const tbody = document.getElementById('tbody');
+function renderTabellaDosi(dati){
+  const tbody = document.getElementById('tbodyDosi');
   tbody.innerHTML = '';
 
   if (!dati.length){
-    tbody.innerHTML = '<tr><td colspan="8" class="empty">Nessuna registrazione trovata.</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="7" class="empty">Nessun dettaglio dose.</td></tr>';
     return;
   }
 
-  dati.forEach(r => {
-    const tr = document.createElement('tr');
-    tr.innerHTML = `
-      <td>${r.data || '-'}</td>
-      <td>${r.pasto || '-'}</td>
-      <td>${r.glicemia || '-'}</td>
-      <td>${livelloGlicemia(r.glicemia)}</td>
-      <td>${r.doseConsigliata || '-'}</td>
-      <td>${r.insulinaReale || '-'}</td>
-      <td>${r.nota || '-'}</td>
-      <td>
-        <button class="small-btn" style="background:#dbeafe;color:#1d4ed8;" onclick="modificaRiga('${r.id}')">Modifica</button>
-        <button class="small-btn" style="background:#fee2e2;color:#991b1b;" onclick="eliminaRiga('${r.id}')">Elimina</button>
-      </td>
-    `;
-    tbody.appendChild(tr);
-  });
+  dati
+    .slice()
+    .sort((a,b) => b.data.localeCompare(a.data))
+    .forEach(r => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td>${r.data || '-'}</td>
+        <td>${r.doseConsigliataColazione || '-'}</td>
+        <td>${r.doseConsigliataPranzo || '-'}</td>
+        <td>${r.doseConsigliataCena || '-'}</td>
+        <td>${r.doseConsigliataNotte || '-'}</td>
+        <td>${r.insulinaNotte || '-'}</td>
+        <td>
+          <button class="small-btn" style="background:#dbeafe;color:#1d4ed8;" onclick="caricaGiornata('${r.data}')">Carica</button>
+          <button class="small-btn" style="background:#fee2e2;color:#991b1b;" onclick="eliminaGiornata('${r.data}')">Elimina</button>
+        </td>
+      `;
+      tbody.appendChild(tr);
+    });
 }
 
 function render(){
   const dati = getData();
   aggiornaRiepilogo(dati);
   renderTabellaGiornaliera(dati);
-  renderTabellaDettagliata(dati);
+  renderTabellaDosi(dati);
 }
 
 function toggleReport(){
@@ -1048,6 +972,7 @@ function renderSchema(){
       <td><input class="schema-input" type="number" id="s_col_${index}" value="${riga.col ?? ''}"></td>
       <td><input class="schema-input" type="number" id="s_pra_${index}" value="${riga.pra ?? ''}"></td>
       <td><input class="schema-input" type="number" id="s_cen_${index}" value="${riga.cen ?? ''}"></td>
+      <td><input class="schema-input" type="number" id="s_not_${index}" value="${riga.not ?? ''}"></td>
       <td><button class="small-btn" style="background:#fee2e2;color:#991b1b;" onclick="eliminaRigaSchema(${index})">Elimina</button></td>
     `;
     tbody.appendChild(tr);
@@ -1056,7 +981,7 @@ function renderSchema(){
 
 function aggiungiRigaSchema(){
   const schema = getSchema();
-  schema.push({ min:'', max:'', col:'', pra:'', cen:'' });
+  schema.push({ min:'', max:'', col:'', pra:'', cen:'', not:'' });
   setSchema(schema);
   renderSchema();
 }
@@ -1078,19 +1003,21 @@ function salvaSchema(){
     const col = Number(document.getElementById(`s_col_${i}`).value);
     const pra = Number(document.getElementById(`s_pra_${i}`).value);
     const cen = Number(document.getElementById(`s_cen_${i}`).value);
+    const not = Number(document.getElementById(`s_not_${i}`).value);
 
     if (
       Number.isNaN(min) ||
       Number.isNaN(max) ||
       Number.isNaN(col) ||
       Number.isNaN(pra) ||
-      Number.isNaN(cen)
+      Number.isNaN(cen) ||
+      Number.isNaN(not)
     ){
       msg('Controlla lo schema: ci sono campi vuoti o non validi.', false);
       return;
     }
 
-    nuovoSchema.push({ min, max, col, pra, cen });
+    nuovoSchema.push({ min, max, col, pra, cen, not });
   }
 
   nuovoSchema.sort((a,b) => a.min - b.min);
@@ -1113,13 +1040,14 @@ function ripristinaSchemaDefault(){
 document.getElementById('g_col').addEventListener('input', function(){
   aggiornaDoseElemento('g_col', 'dose_col', 'col');
 });
-
 document.getElementById('g_pra').addEventListener('input', function(){
   aggiornaDoseElemento('g_pra', 'dose_pra', 'pra');
 });
-
 document.getElementById('g_cen').addEventListener('input', function(){
   aggiornaDoseElemento('g_cen', 'dose_cen', 'cen');
+});
+document.getElementById('g_not').addEventListener('input', function(){
+  aggiornaDoseElemento('g_not', 'dose_not', 'not');
 });
 
 document.getElementById('schemaBackdrop').addEventListener('click', function(e){
