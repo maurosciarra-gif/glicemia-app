@@ -9,41 +9,43 @@
     :root{
       --bg:#efefef;
       --blue:#3b82f6;
-      --sand:#f3dfc4;
-      --violet:#e5dcf9;
-      --night:#dde7f5;
       --green:#0f766e;
       --text:#111827;
       --muted:#6b7280;
-      --line:#d1d5db;
       --danger:#dc2626;
       --danger-bg:#fee2e2;
       --ok:#16a34a;
       --shadow:0 10px 24px rgba(0,0,0,.08);
     }
+
     *{box-sizing:border-box}
+
     body{
       margin:0;
       font-family:Arial, Helvetica, sans-serif;
       background:var(--bg);
       color:var(--text);
     }
+
     .app{
       max-width:520px;
       margin:0 auto;
       padding:16px 14px 28px;
     }
+
     .title{
       text-align:center;
       font-size:28px;
       font-weight:800;
       margin:8px 0 18px;
     }
+
     .topbar{
       display:flex;
       gap:10px;
       margin-bottom:12px;
     }
+
     .topbar button{
       flex:1;
       min-height:52px;
@@ -56,9 +58,11 @@
       box-shadow:var(--shadow);
       cursor:pointer;
     }
+
     .datebox{
       margin-bottom:14px;
     }
+
     .datebox input{
       width:100%;
       min-height:54px;
@@ -68,21 +72,25 @@
       font-size:18px;
       background:#fff;
     }
+
     .card{
       border-radius:24px;
       padding:18px 16px 16px;
       margin-bottom:16px;
       box-shadow:var(--shadow);
     }
+
     .card-colazione{ background:#cfe7f7; }
     .card-pranzo{ background:#f3e1c8; }
     .card-cena{ background:#e7ddfa; }
     .card-notte{ background:#dde7f5; }
+
     .meal-title{
       font-size:24px;
       font-weight:800;
       margin:0 0 16px;
     }
+
     .field{
       width:100%;
       min-height:56px;
@@ -94,26 +102,31 @@
       outline:none;
       margin-bottom:10px;
     }
+
     .field:focus{
       border-color:#3b82f6;
       box-shadow:0 0 0 4px rgba(59,130,246,.12);
     }
+
     .dose{
       font-size:19px;
       font-weight:800;
       color:var(--green);
       margin:4px 0 10px;
     }
+
     .dose small{
       font-weight:700;
       opacity:.95;
     }
+
     .section-actions{
       display:grid;
       grid-template-columns:1fr 1fr;
       gap:10px;
       margin:14px 0;
     }
+
     .btn{
       min-height:48px;
       border:none;
@@ -123,14 +136,17 @@
       font-weight:800;
       cursor:pointer;
     }
+
     .btn-primary{ background:var(--blue); color:#fff; }
     .btn-soft{ background:#dbeafe; color:#1d4ed8; }
     .btn-danger{ background:var(--danger-bg); color:#991b1b; }
     .btn-gray{ background:#e5e7eb; color:#111827; }
+
     .btn:disabled{
       opacity:.6;
       cursor:not-allowed;
     }
+
     .message{
       min-height:22px;
       font-size:14px;
@@ -138,12 +154,14 @@
       margin:8px 2px 12px;
       color:var(--ok);
     }
+
     .note{
       font-size:13px;
       color:var(--muted);
       margin-top:6px;
       line-height:1.35;
     }
+
     .panel{
       background:#fff;
       border-radius:22px;
@@ -151,31 +169,37 @@
       padding:16px;
       margin-top:16px;
     }
+
     .panel h2{
       margin:0 0 12px;
       font-size:20px;
     }
+
     .summary{
       display:grid;
       grid-template-columns:1fr 1fr;
       gap:10px;
       margin-bottom:12px;
     }
+
     .summary-box{
       background:#f9fafb;
       border:1px solid #e5e7eb;
       border-radius:16px;
       padding:12px;
     }
+
     .summary-box span{
       display:block;
       color:var(--muted);
       font-size:13px;
       margin-bottom:4px;
     }
+
     .summary-box strong{
       font-size:20px;
     }
+
     .table-wrap{
       overflow:auto;
       border:1px solid #e5e7eb;
@@ -183,11 +207,13 @@
       margin-top:10px;
       background:#fff;
     }
+
     table{
       width:100%;
       border-collapse:collapse;
       min-width:980px;
     }
+
     th, td{
       text-align:left;
       padding:10px 8px;
@@ -195,9 +221,11 @@
       font-size:14px;
       vertical-align:middle;
     }
+
     th{
       background:#f9fafb;
     }
+
     .small-btn{
       min-height:34px;
       padding:6px 10px;
@@ -208,11 +236,13 @@
       cursor:pointer;
       margin-right:6px;
     }
+
     .empty{
       padding:18px;
       text-align:center;
       color:var(--muted);
     }
+
     .modal-backdrop{
       position:fixed;
       inset:0;
@@ -223,6 +253,7 @@
       padding:16px;
       z-index:1000;
     }
+
     .modal{
       width:min(860px, 100%);
       max-height:88vh;
@@ -232,6 +263,7 @@
       box-shadow:0 20px 50px rgba(0,0,0,.25);
       padding:18px;
     }
+
     .modal-top{
       display:flex;
       justify-content:space-between;
@@ -239,6 +271,7 @@
       gap:10px;
       margin-bottom:12px;
     }
+
     .schema-input{
       width:100%;
       min-height:42px;
@@ -247,7 +280,10 @@
       padding:8px 10px;
       font-size:15px;
     }
-    .hidden{ display:none !important; }
+
+    .hidden{
+      display:none !important;
+    }
   </style>
 </head>
 <body>
@@ -425,8 +461,8 @@
   </div>
 
 <script>
-const KEY = 'glicemia_diario_completo_v3';
-const KEY_SCHEMA = 'glicemia_schema_dottoressa_v4';
+const KEY = 'glicemia_diario_corretto_v1';
+const KEY_SCHEMA = 'glicemia_schema_dottoressa_v5';
 
 let salvataggioInCorso = false;
 
@@ -452,10 +488,12 @@ function ieri(){
 
 function impostaOggi(){
   document.getElementById('data').value = oggi();
+  caricaOPulisciPerData();
 }
 
 function impostaIeri(){
   document.getElementById('data').value = ieri();
+  caricaOPulisciPerData();
 }
 
 function getData(){
@@ -511,7 +549,6 @@ function aggiornataDose(glicemia, tipo, doseVecchia){
   if (glicemia === '' || glicemia === null || glicemia === undefined){
     return doseVecchia || '';
   }
-
   const dose = calcolaInsulina(glicemia, tipo);
   return dose !== '' ? dose : (doseVecchia || '');
 }
@@ -548,6 +585,37 @@ function pulisciCampi(){
   document.getElementById('i_not').value = '';
 
   aggiornaTutteLeDosi();
+}
+
+function caricaOPulisciPerData(){
+  const data = document.getElementById('data').value;
+  if (!data) return;
+
+  const r = getData().find(x => x.data === data);
+
+  if (!r){
+    pulisciCampi();
+    msg('Nuova data: campi puliti.');
+    return;
+  }
+
+  document.getElementById('g_col').value = r.glicemiaColazione ?? '';
+  document.getElementById('i_col').value = r.insulinaColazione ?? '';
+  document.getElementById('g_col_post').value = r.glicemiaDopoColazione ?? '';
+
+  document.getElementById('g_pra').value = r.glicemiaPranzo ?? '';
+  document.getElementById('i_pra').value = r.insulinaPranzo ?? '';
+  document.getElementById('g_pra_post').value = r.glicemiaDopoPranzo ?? '';
+
+  document.getElementById('g_cen').value = r.glicemiaCena ?? '';
+  document.getElementById('i_cen').value = r.insulinaCena ?? '';
+  document.getElementById('g_cen_post').value = r.glicemiaDopoCena ?? '';
+
+  document.getElementById('g_not').value = r.glicemiaNotte ?? '';
+  document.getElementById('i_not').value = r.insulinaNotte ?? '';
+
+  aggiornaTutteLeDosi();
+  msg('Giornata caricata.');
 }
 
 function datiForm(){
@@ -608,85 +676,80 @@ function salvaGiornata(){
     const idx = dati.findIndex(r => r.data === record.data);
 
     if (idx === -1){
-      setData([record, ...dati].sort((a,b) => b.data.localeCompare(a.data)));
-      pulisciCampi();
-      render();
+      const nuovo = { ...record };
+      setData([nuovo, ...dati].sort((a,b) => b.data.localeCompare(a.data)));
       msg('Nuova giornata salvata.');
+      render();
       return;
     }
 
     const esistente = dati[idx];
+    const scegli = (nuovo, vecchio) => nuovo !== '' ? nuovo : (vecchio ?? '');
 
     const aggiornato = {
       ...esistente,
       data: record.data,
 
-      glicemiaColazione: record.glicemiaColazione !== '' ? record.glicemiaColazione : esistente.glicemiaColazione,
-      insulinaColazione: record.insulinaColazione !== '' ? record.insulinaColazione : esistente.insulinaColazione,
-      glicemiaDopoColazione: record.glicemiaDopoColazione !== '' ? record.glicemiaDopoColazione : esistente.glicemiaDopoColazione,
+      glicemiaColazione: scegli(record.glicemiaColazione, esistente.glicemiaColazione),
+      insulinaColazione: scegli(record.insulinaColazione, esistente.insulinaColazione),
+      glicemiaDopoColazione: scegli(record.glicemiaDopoColazione, esistente.glicemiaDopoColazione),
 
-      glicemiaPranzo: record.glicemiaPranzo !== '' ? record.glicemiaPranzo : esistente.glicemiaPranzo,
-      insulinaPranzo: record.insulinaPranzo !== '' ? record.insulinaPranzo : esistente.insulinaPranzo,
-      glicemiaDopoPranzo: record.glicemiaDopoPranzo !== '' ? record.glicemiaDopoPranzo : esistente.glicemiaDopoPranzo,
+      glicemiaPranzo: scegli(record.glicemiaPranzo, esistente.glicemiaPranzo),
+      insulinaPranzo: scegli(record.insulinaPranzo, esistente.insulinaPranzo),
+      glicemiaDopoPranzo: scegli(record.glicemiaDopoPranzo, esistente.glicemiaDopoPranzo),
 
-      glicemiaCena: record.glicemiaCena !== '' ? record.glicemiaCena : esistente.glicemiaCena,
-      insulinaCena: record.insulinaCena !== '' ? record.insulinaCena : esistente.insulinaCena,
-      glicemiaDopoCena: record.glicemiaDopoCena !== '' ? record.glicemiaDopoCena : esistente.glicemiaDopoCena,
+      glicemiaCena: scegli(record.glicemiaCena, esistente.glicemiaCena),
+      insulinaCena: scegli(record.insulinaCena, esistente.insulinaCena),
+      glicemiaDopoCena: scegli(record.glicemiaDopoCena, esistente.glicemiaDopoCena),
 
-      glicemiaNotte: record.glicemiaNotte !== '' ? record.glicemiaNotte : esistente.glicemiaNotte,
-      insulinaNotte: record.insulinaNotte !== '' ? record.insulinaNotte : esistente.insulinaNotte
+      glicemiaNotte: scegli(record.glicemiaNotte, esistente.glicemiaNotte),
+      insulinaNotte: scegli(record.insulinaNotte, esistente.insulinaNotte)
     };
 
-    aggiornato.doseConsigliataColazione = aggiornataDose(aggiornato.glicemiaColazione, 'col', esistente.doseConsigliataColazione);
-    aggiornato.doseConsigliataPranzo = aggiornataDose(aggiornato.glicemiaPranzo, 'pra', esistente.doseConsigliataPranzo);
-    aggiornato.doseConsigliataCena = aggiornataDose(aggiornato.glicemiaCena, 'cen', esistente.doseConsigliataCena);
-    aggiornato.doseConsigliataNotte = aggiornataDose(aggiornato.glicemiaNotte, 'not', esistente.doseConsigliataNotte);
+    aggiornato.doseConsigliataColazione = aggiornataDose(
+      aggiornato.glicemiaColazione,
+      'col',
+      esistente.doseConsigliataColazione
+    );
+    aggiornato.doseConsigliataPranzo = aggiornataDose(
+      aggiornato.glicemiaPranzo,
+      'pra',
+      esistente.doseConsigliataPranzo
+    );
+    aggiornato.doseConsigliataCena = aggiornataDose(
+      aggiornato.glicemiaCena,
+      'cen',
+      esistente.doseConsigliataCena
+    );
+    aggiornato.doseConsigliataNotte = aggiornataDose(
+      aggiornato.glicemiaNotte,
+      'not',
+      esistente.doseConsigliataNotte
+    );
 
     dati[idx] = aggiornato;
-
     setData(dati.sort((a,b) => b.data.localeCompare(a.data)));
-    pulisciCampi();
-    render();
     msg('Giornata aggiornata correttamente.');
+    render();
   } finally {
     salvataggioInCorso = false;
     btn.disabled = false;
   }
 }
 
-function caricaGiornata(data){
-  const r = getData().find(x => x.data === data);
-  if (!r) return;
-
-  document.getElementById('data').value = r.data || oggi();
-
-  document.getElementById('g_col').value = r.glicemiaColazione || '';
-  document.getElementById('i_col').value = r.insulinaColazione || '';
-  document.getElementById('g_col_post').value = r.glicemiaDopoColazione || '';
-
-  document.getElementById('g_pra').value = r.glicemiaPranzo || '';
-  document.getElementById('i_pra').value = r.insulinaPranzo || '';
-  document.getElementById('g_pra_post').value = r.glicemiaDopoPranzo || '';
-
-  document.getElementById('g_cen').value = r.glicemiaCena || '';
-  document.getElementById('i_cen').value = r.insulinaCena || '';
-  document.getElementById('g_cen_post').value = r.glicemiaDopoCena || '';
-
-  document.getElementById('g_not').value = r.glicemiaNotte || '';
-  document.getElementById('i_not').value = r.insulinaNotte || '';
-
-  aggiornaTutteLeDosi();
-  window.scrollTo({ top: 0, behavior: 'smooth' });
-  msg('Giornata caricata nei campi.');
-}
-
 function eliminaGiornata(data){
   const conferma = confirm(`Vuoi eliminare la giornata ${data}?`);
   if (!conferma) return;
-
   setData(getData().filter(r => r.data !== data));
   render();
+  if (document.getElementById('data').value === data) pulisciCampi();
   msg('Giornata eliminata.');
+}
+
+function caricaGiornata(data){
+  document.getElementById('data').value = data;
+  caricaOPulisciPerData();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
 function svuotaTutto(){
@@ -803,6 +866,7 @@ Inserisci 1 oppure 2`
 
         setData(datiImportati);
         render();
+        caricaOPulisciPerData();
         msg('Backup ripristinato.');
       } else if (scelta === '2'){
         const datiAttuali = getData();
@@ -810,6 +874,7 @@ Inserisci 1 oppure 2`
         const nuovi = datiImportati.filter(r => !nuoveDate.has(r.data));
         setData([...nuovi, ...datiAttuali].sort((a,b) => b.data.localeCompare(a.data)));
         render();
+        caricaOPulisciPerData();
         msg(`Unione completata: aggiunti ${nuovi.length} record.`);
       } else {
         msg('Scelta non valida.', false);
@@ -1054,7 +1119,10 @@ document.getElementById('schemaBackdrop').addEventListener('click', function(e){
   if (e.target === this) chiudiSchema();
 });
 
+document.getElementById('data').addEventListener('change', caricaOPulisciPerData);
+
 document.getElementById('data').value = oggi();
+caricaOPulisciPerData();
 aggiornaTutteLeDosi();
 render();
 </script>
