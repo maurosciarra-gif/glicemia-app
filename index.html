@@ -345,7 +345,6 @@
 
     <div class="card card-notte">
       <div class="meal-title">🌌 Notte</div>
-      <input id="g_not" class="field" type="number" inputmode="decimal" placeholder="Glicemia notte" />
       <div id="dose_not" class="dose">💉 <small>Dose consigliata:</small> -</div>
       <input id="i_not" class="field" type="number" inputmode="decimal" placeholder="Insulina notte" />
     </div>
@@ -359,6 +358,7 @@
 
     <div class="note">
       Giornata esistente: i campi già compilati sono bloccati, i campi vuoti restano liberi.<br>
+      La dose notte viene calcolata usando <strong>glicemia dopo cena</strong>.<br>
       Premi <strong>Sblocca modifica</strong> solo se vuoi cambiare un valore già salvato.<br>
       Per azzerare un valore, scrivi <strong>0</strong>.
     </div>
@@ -411,7 +411,6 @@
               <th>Glic. cena</th>
               <th>Ins. cena</th>
               <th>Dopo cena</th>
-              <th>Glic. notte</th>
               <th>Ins. notte</th>
             </tr>
           </thead>
@@ -503,8 +502,8 @@
   </div>
 
 <script>
-const KEY = 'glicemia_diario_utente_v1';
-const KEY_SCHEMA = 'glicemia_schema_dottoressa_v8';
+const KEY = 'glicemia_diario_utente_v2';
+const KEY_SCHEMA = 'glicemia_schema_dottoressa_v9';
 const KEY_UTENTE = 'glicemia_utente_attivo_v1';
 
 let salvataggioInCorso = false;
@@ -563,6 +562,9 @@ function salvaUtente(){
   }
   setUtente(nome);
   aggiornaUtenteUI();
+  chiudiImpostazioni();
+  caricaOPulisciPerData();
+  render();
   msg('Profilo utente salvato.');
 }
 
@@ -623,7 +625,6 @@ function setCampiBloccatiPerRecord(record, forzaSblocco = false){
     ['i_cen', record?.insulinaCena],
     ['g_cen_post', record?.glicemiaDopoCena],
 
-    ['g_not', record?.glicemiaNotte],
     ['i_not', record?.insulinaNotte]
   ];
 
@@ -686,7 +687,11 @@ function aggiornaTutteLeDosi(){
   aggiornaDoseElemento('g_col', 'dose_col', 'col');
   aggiornaDoseElemento('g_pra', 'dose_pra', 'pra');
   aggiornaDoseElemento('g_cen', 'dose_cen', 'cen');
-  aggiornaDoseElemento('g_not', 'dose_not', 'not');
+
+  const doseNotte = calcolaInsulina(document.getElementById('g_cen_post').value, 'not');
+  document.getElementById('dose_not').innerText = doseNotte
+    ? `💉 Dose consigliata: ${doseNotte} U`
+    : '💉 Dose consigliata: -';
 }
 
 function pulisciCampi(){
@@ -702,7 +707,6 @@ function pulisciCampi(){
   document.getElementById('i_cen').value = '';
   document.getElementById('g_cen_post').value = '';
 
-  document.getElementById('g_not').value = '';
   document.getElementById('i_not').value = '';
 
   modificaSbloccata = false;
@@ -735,7 +739,6 @@ function caricaOPulisciPerData(){
   document.getElementById('i_cen').value = r.insulinaCena ?? '';
   document.getElementById('g_cen_post').value = r.glicemiaDopoCena ?? '';
 
-  document.getElementById('g_not').value = r.glicemiaNotte ?? '';
   document.getElementById('i_not').value = r.insulinaNotte ?? '';
 
   modificaSbloccata = false;
@@ -748,7 +751,7 @@ function datiForm(){
   const gCol = document.getElementById('g_col').value.trim();
   const gPra = document.getElementById('g_pra').value.trim();
   const gCen = document.getElementById('g_cen').value.trim();
-  const gNot = document.getElementById('g_not').value.trim();
+  const gCenPost = document.getElementById('g_cen_post').value.trim();
 
   return {
     utente: getUtente().trim(),
@@ -763,20 +766,21 @@ function datiForm(){
 
     glicemiaCena: gCen,
     insulinaCena: document.getElementById('i_cen').value.trim(),
-    glicemiaDopoCena: document.getElementById('g_cen_post').value.trim(),
+    glicemiaDopoCena: gCenPost,
 
-    glicemiaNotte: gNot,
     insulinaNotte: document.getElementById('i_not').value.trim(),
 
     doseConsigliataColazione: calcolaInsulina(gCol, 'col'),
     doseConsigliataPranzo: calcolaInsulina(gPra, 'pra'),
     doseConsigliataCena: calcolaInsulina(gCen, 'cen'),
-    doseConsigliataNotte: calcolaInsulina(gNot, 'not')
+    doseConsigliataNotte: calcolaInsulina(gCenPost, 'not')
   };
 }
 
 function almenoUnValore(record){
-  return Object.entries(record).some(([k,v]) => k !== 'data' && k !== 'utente' && v !== '');
+  return Object.entries(record).some(([k,v]) =>
+    k !== 'data' && k !== 'utente' && v !== ''
+  );
 }
 
 function salvaGiornata(){
@@ -834,7 +838,6 @@ function salvaGiornata(){
       (record.insulinaCena !== '' && (esistente.insulinaCena ?? '') !== '' && record.insulinaCena !== String(esistente.insulinaCena)) ||
       (record.glicemiaDopoCena !== '' && (esistente.glicemiaDopoCena ?? '') !== '' && record.glicemiaDopoCena !== String(esistente.glicemiaDopoCena)) ||
 
-      (record.glicemiaNotte !== '' && (esistente.glicemiaNotte ?? '') !== '' && record.glicemiaNotte !== String(esistente.glicemiaNotte)) ||
       (record.insulinaNotte !== '' && (esistente.insulinaNotte ?? '') !== '' && record.insulinaNotte !== String(esistente.insulinaNotte));
 
     if (staModificandoValoriEsistenti && !modificaSbloccata){
@@ -861,7 +864,6 @@ function salvaGiornata(){
       insulinaCena: scegli(record.insulinaCena, esistente.insulinaCena),
       glicemiaDopoCena: scegli(record.glicemiaDopoCena, esistente.glicemiaDopoCena),
 
-      glicemiaNotte: scegli(record.glicemiaNotte, esistente.glicemiaNotte),
       insulinaNotte: scegli(record.insulinaNotte, esistente.insulinaNotte)
     };
 
@@ -881,7 +883,7 @@ function salvaGiornata(){
       esistente.doseConsigliataCena
     );
     aggiornato.doseConsigliataNotte = aggiornataDose(
-      aggiornato.glicemiaNotte,
+      aggiornato.glicemiaDopoCena,
       'not',
       esistente.doseConsigliataNotte
     );
@@ -976,7 +978,6 @@ function esportaCSV(){
     'Glicemia cena',
     'Insulina cena',
     'Glicemia dopo cena',
-    'Glicemia notte',
     'Insulina notte'
   ]];
 
@@ -996,7 +997,6 @@ function esportaCSV(){
         r.glicemiaCena || '',
         r.insulinaCena || '',
         r.glicemiaDopoCena || '',
-        r.glicemiaNotte || '',
         r.insulinaNotte || ''
       ]);
     });
@@ -1143,8 +1143,7 @@ function aggiornaRiepilogo(dati){
       r.glicemiaPranzo,
       r.glicemiaDopoPranzo,
       r.glicemiaCena,
-      r.glicemiaDopoCena,
-      r.glicemiaNotte
+      r.glicemiaDopoCena
     ].forEach(v => tutteGlicemie.push(v));
 
     [
@@ -1159,7 +1158,6 @@ function aggiornaRiepilogo(dati){
   document.getElementById('mediaG').textContent = mediaNumerica(tutteGlicemie);
   document.getElementById('totaleI').textContent = sommaNumerica(tutteInsuline);
   document.getElementById('numR').textContent = filtrati.length;
-  document.getElementById('ultimaData').textContent = filtrati.length ? filtrati[0].data : '-';
 }
 
 function renderTabellaGiornaliera(dati){
@@ -1169,7 +1167,7 @@ function renderTabellaGiornaliera(dati){
   tbody.innerHTML = '';
 
   if (!filtrati.length){
-    tbody.innerHTML = '<tr><td colspan="13" class="empty">Nessun dato giornaliero.</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="12" class="empty">Nessun dato giornaliero.</td></tr>';
     return;
   }
 
@@ -1190,7 +1188,6 @@ function renderTabellaGiornaliera(dati){
         <td>${r.glicemiaCena || '-'}</td>
         <td>${r.insulinaCena || '-'}</td>
         <td>${r.glicemiaDopoCena || '-'}</td>
-        <td>${r.glicemiaNotte || '-'}</td>
         <td>${r.insulinaNotte || '-'}</td>
       `;
       tbody.appendChild(tr);
@@ -1338,8 +1335,11 @@ document.getElementById('g_pra').addEventListener('input', function(){
 document.getElementById('g_cen').addEventListener('input', function(){
   aggiornaDoseElemento('g_cen', 'dose_cen', 'cen');
 });
-document.getElementById('g_not').addEventListener('input', function(){
-  aggiornaDoseElemento('g_not', 'dose_not', 'not');
+document.getElementById('g_cen_post').addEventListener('input', function(){
+  const doseNotte = calcolaInsulina(this.value, 'not');
+  document.getElementById('dose_not').innerText = doseNotte
+    ? `💉 Dose consigliata: ${doseNotte} U`
+    : '💉 Dose consigliata: -';
 });
 
 document.getElementById('schemaBackdrop').addEventListener('click', function(e){
