@@ -37,7 +37,15 @@
       text-align:center;
       font-size:28px;
       font-weight:800;
-      margin:8px 0 18px;
+      margin:8px 0 10px;
+    }
+
+    .subtitle{
+      text-align:center;
+      color:var(--muted);
+      font-size:14px;
+      margin:0 0 16px;
+      font-weight:700;
     }
 
     .topbar{
@@ -212,7 +220,7 @@
     table{
       width:100%;
       border-collapse:collapse;
-      min-width:980px;
+      min-width:1080px;
     }
 
     th, td{
@@ -290,6 +298,7 @@
 <body>
   <div class="app">
     <div class="title">📊 Glicemia App PRO</div>
+    <div id="utenteAttivoBox" class="subtitle">Utente attivo: -</div>
 
     <div class="datebox">
       <input id="data" type="date" />
@@ -303,6 +312,11 @@
     <div class="topbar">
       <button type="button" onclick="apriSchema()">⚙️ Schema dottoressa</button>
       <button type="button" onclick="toggleReport()">📋 Report</button>
+    </div>
+
+    <div class="topbar">
+      <button type="button" onclick="apriImpostazioni()">👤 Impostazioni</button>
+      <button type="button" onclick="document.getElementById('fileRipristino').click()">☁️ Ripristina backup</button>
     </div>
 
     <div class="card card-colazione">
@@ -339,11 +353,8 @@
     <div class="section-actions">
       <button id="btnSalva" class="btn btn-primary" onclick="salvaGiornata()">Salva giornata</button>
       <button id="btnSblocca" class="btn btn-soft" onclick="sbloccaModifica()" disabled>Sblocca modifica</button>
-      <button class="btn btn-soft" onclick="pulisciCampi()">Pulisci campi</button>
       <button class="btn btn-soft" onclick="esportaCSV()">Esporta CSV</button>
       <button class="btn btn-soft" onclick="creaBackupJSON()">Backup JSON</button>
-      <button class="btn btn-soft" onclick="document.getElementById('fileRipristino').click()">Ripristina backup</button>
-      <button class="btn btn-danger" onclick="svuotaTutto()">Svuota tutto</button>
     </div>
 
     <div class="note">
@@ -367,6 +378,10 @@
 
       <div class="summary">
         <div class="summary-box">
+          <span>Utente</span>
+          <strong id="reportUtente">-</strong>
+        </div>
+        <div class="summary-box">
           <span>Media glicemia</span>
           <strong id="mediaG">-</strong>
         </div>
@@ -378,10 +393,6 @@
           <span>Giorni registrati</span>
           <strong id="numR">0</strong>
         </div>
-        <div class="summary-box">
-          <span>Ultima data</span>
-          <strong id="ultimaData">-</strong>
-        </div>
       </div>
 
       <h2>Tabella giornaliera</h2>
@@ -389,6 +400,7 @@
         <table>
           <thead>
             <tr>
+              <th>Utente</th>
               <th>Data</th>
               <th>Glic. col.</th>
               <th>Ins. col.</th>
@@ -412,6 +424,7 @@
         <table>
           <thead>
             <tr>
+              <th>Utente</th>
               <th>Data</th>
               <th>Dose colazione</th>
               <th>Dose pranzo</th>
@@ -463,9 +476,36 @@
     </div>
   </div>
 
+  <div id="impostazioniBackdrop" class="modal-backdrop">
+    <div class="modal">
+      <div class="modal-top">
+        <h2>Impostazioni utente</h2>
+        <button class="btn btn-gray" onclick="chiudiImpostazioni()">Chiudi</button>
+      </div>
+
+      <label for="nomeUtenteInput" style="font-weight:800; display:block; margin-bottom:8px;">
+        Nome utente
+      </label>
+      <input id="nomeUtenteInput" class="field" type="text" placeholder="Es. Mauro" />
+
+      <div class="section-actions">
+        <button class="btn btn-primary" onclick="salvaUtente()">Salva profilo</button>
+        <button class="btn btn-soft" onclick="creaBackupJSON()">Backup JSON</button>
+        <button class="btn btn-soft" onclick="esportaCSV()">Esporta CSV</button>
+        <button class="btn btn-danger" onclick="svuotaTuttoConferma()">Svuota tutto</button>
+      </div>
+
+      <div class="note">
+        “Svuota tutto” cancella tutti i dati locali dell’utente attivo salvati nel browser.<br>
+        I file già esportati o scaricati non vengono cancellati.
+      </div>
+    </div>
+  </div>
+
 <script>
-const KEY = 'glicemia_diario_blocco_parziale_v1';
-const KEY_SCHEMA = 'glicemia_schema_dottoressa_v7';
+const KEY = 'glicemia_diario_utente_v1';
+const KEY_SCHEMA = 'glicemia_schema_dottoressa_v8';
+const KEY_UTENTE = 'glicemia_utente_attivo_v1';
 
 let salvataggioInCorso = false;
 let modificaSbloccata = false;
@@ -500,6 +540,41 @@ function impostaIeri(){
   caricaOPulisciPerData();
 }
 
+function getUtente(){
+  return localStorage.getItem(KEY_UTENTE) || '';
+}
+
+function setUtente(nome){
+  localStorage.setItem(KEY_UTENTE, nome);
+}
+
+function aggiornaUtenteUI(){
+  const utente = getUtente();
+  document.getElementById('utenteAttivoBox').textContent = `Utente attivo: ${utente || '-'}`;
+  document.getElementById('reportUtente').textContent = utente || '-';
+  document.getElementById('nomeUtenteInput').value = utente;
+}
+
+function salvaUtente(){
+  const nome = document.getElementById('nomeUtenteInput').value.trim();
+  if (!nome){
+    msg('Inserisci un nome utente.', false);
+    return;
+  }
+  setUtente(nome);
+  aggiornaUtenteUI();
+  msg('Profilo utente salvato.');
+}
+
+function apriImpostazioni(){
+  aggiornaUtenteUI();
+  document.getElementById('impostazioniBackdrop').style.display = 'flex';
+}
+
+function chiudiImpostazioni(){
+  document.getElementById('impostazioniBackdrop').style.display = 'none';
+}
+
 function getData(){
   try{
     return JSON.parse(localStorage.getItem(KEY)) || [];
@@ -532,44 +607,6 @@ function msg(t, ok=true){
   setTimeout(() => {
     if (el.textContent === t) el.textContent = '';
   }, 2600);
-}
-
-function calcolaInsulina(glicemia, tipo){
-  const g = Number(glicemia);
-  if (Number.isNaN(g)) return '';
-
-  const schema = getSchema();
-  const fascia = schema.find(f => g >= Number(f.min) && g <= Number(f.max));
-  if (!fascia) return '';
-
-  if (tipo === 'col') return fascia.col;
-  if (tipo === 'pra') return fascia.pra;
-  if (tipo === 'cen') return fascia.cen;
-  if (tipo === 'not') return fascia.not;
-  return '';
-}
-
-function aggiornataDose(glicemia, tipo, doseVecchia){
-  if (glicemia === '' || glicemia === null || glicemia === undefined){
-    return doseVecchia || '';
-  }
-  const dose = calcolaInsulina(glicemia, tipo);
-  return dose !== '' ? dose : (doseVecchia || '');
-}
-
-function aggiornaDoseElemento(inputId, doseId, tipo){
-  const glicemia = document.getElementById(inputId).value;
-  const dose = calcolaInsulina(glicemia, tipo);
-  document.getElementById(doseId).innerText = dose
-    ? `💉 Dose consigliata: ${dose} U`
-    : '💉 Dose consigliata: -';
-}
-
-function aggiornaTutteLeDosi(){
-  aggiornaDoseElemento('g_col', 'dose_col', 'col');
-  aggiornaDoseElemento('g_pra', 'dose_pra', 'pra');
-  aggiornaDoseElemento('g_cen', 'dose_cen', 'cen');
-  aggiornaDoseElemento('g_not', 'dose_not', 'not');
 }
 
 function setCampiBloccatiPerRecord(record, forzaSblocco = false){
@@ -614,6 +651,44 @@ function sbloccaModifica(){
   msg('Modifica completa sbloccata. Ora puoi correggere anche i valori già presenti.');
 }
 
+function calcolaInsulina(glicemia, tipo){
+  const g = Number(glicemia);
+  if (Number.isNaN(g)) return '';
+
+  const schema = getSchema();
+  const fascia = schema.find(f => g >= Number(f.min) && g <= Number(f.max));
+  if (!fascia) return '';
+
+  if (tipo === 'col') return fascia.col;
+  if (tipo === 'pra') return fascia.pra;
+  if (tipo === 'cen') return fascia.cen;
+  if (tipo === 'not') return fascia.not;
+  return '';
+}
+
+function aggiornataDose(glicemia, tipo, doseVecchia){
+  if (glicemia === '' || glicemia === null || glicemia === undefined){
+    return doseVecchia || '';
+  }
+  const dose = calcolaInsulina(glicemia, tipo);
+  return dose !== '' ? dose : (doseVecchia || '');
+}
+
+function aggiornaDoseElemento(inputId, doseId, tipo){
+  const glicemia = document.getElementById(inputId).value;
+  const dose = calcolaInsulina(glicemia, tipo);
+  document.getElementById(doseId).innerText = dose
+    ? `💉 Dose consigliata: ${dose} U`
+    : '💉 Dose consigliata: -';
+}
+
+function aggiornaTutteLeDosi(){
+  aggiornaDoseElemento('g_col', 'dose_col', 'col');
+  aggiornaDoseElemento('g_pra', 'dose_pra', 'pra');
+  aggiornaDoseElemento('g_cen', 'dose_cen', 'cen');
+  aggiornaDoseElemento('g_not', 'dose_not', 'not');
+}
+
 function pulisciCampi(){
   document.getElementById('g_col').value = '';
   document.getElementById('i_col').value = '';
@@ -639,7 +714,8 @@ function caricaOPulisciPerData(){
   const data = document.getElementById('data').value;
   if (!data) return;
 
-  const r = getData().find(x => x.data === data);
+  const utente = getUtente().trim();
+  const r = getData().find(x => x.data === data && x.utente === utente);
 
   if (!r){
     pulisciCampi();
@@ -675,6 +751,7 @@ function datiForm(){
   const gNot = document.getElementById('g_not').value.trim();
 
   return {
+    utente: getUtente().trim(),
     data: document.getElementById('data').value,
     glicemiaColazione: gCol,
     insulinaColazione: document.getElementById('i_col').value.trim(),
@@ -699,10 +776,17 @@ function datiForm(){
 }
 
 function almenoUnValore(record){
-  return Object.entries(record).some(([k,v]) => k !== 'data' && v !== '');
+  return Object.entries(record).some(([k,v]) => k !== 'data' && k !== 'utente' && v !== '');
 }
 
 function salvaGiornata(){
+  const utente = getUtente().trim();
+  if (!utente){
+    msg('Prima salva il nome utente nelle impostazioni.', false);
+    apriImpostazioni();
+    return;
+  }
+
   if (salvataggioInCorso) return;
 
   salvataggioInCorso = true;
@@ -723,7 +807,7 @@ function salvaGiornata(){
     }
 
     const dati = getData();
-    const idx = dati.findIndex(r => r.data === record.data);
+    const idx = dati.findIndex(r => r.data === record.data && r.utente === record.utente);
 
     if (idx === -1){
       const nuovo = { ...record };
@@ -762,6 +846,7 @@ function salvaGiornata(){
 
     const aggiornato = {
       ...esistente,
+      utente: record.utente,
       data: record.data,
 
       glicemiaColazione: scegli(record.glicemiaColazione, esistente.glicemiaColazione),
@@ -815,38 +900,64 @@ function salvaGiornata(){
   }
 }
 
-function eliminaGiornata(data){
-  const conferma = confirm(`Vuoi eliminare la giornata ${data}?`);
+function eliminaGiornata(utente, data){
+  const conferma = confirm(`Vuoi eliminare la giornata ${data} di ${utente}?`);
   if (!conferma) return;
 
-  setData(getData().filter(r => r.data !== data));
+  setData(getData().filter(r => !(r.data === data && r.utente === utente)));
   render();
 
-  if (document.getElementById('data').value === data){
+  if (document.getElementById('data').value === data && getUtente() === utente){
     pulisciCampi();
   }
 
   msg('Giornata eliminata.');
 }
 
-function caricaGiornata(data){
+function caricaGiornata(data, utente){
+  if (utente && utente !== getUtente()){
+    setUtente(utente);
+    aggiornaUtenteUI();
+  }
   document.getElementById('data').value = data;
   caricaOPulisciPerData();
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
-function svuotaTutto(){
-  const conferma = confirm('Sei sicuro di voler cancellare tutti i dati?');
-  if (!conferma) return;
+function svuotaTuttoConferma(){
+  const utente = getUtente().trim();
+  if (!utente){
+    msg('Nessun utente attivo.', false);
+    return;
+  }
 
-  localStorage.removeItem(KEY);
+  const conferma1 = confirm(`Vuoi cancellare tutti i dati locali dell'utente "${utente}"?`);
+  if (!conferma1) return;
+
+  const testo = prompt('Scrivi CANCELLA per confermare definitivamente.');
+  if (testo !== 'CANCELLA'){
+    msg('Cancellazione annullata.', false);
+    return;
+  }
+
+  const rimasti = getData().filter(r => r.utente !== utente);
+  setData(rimasti);
+
   pulisciCampi();
   render();
-  msg('Tutti i dati sono stati cancellati.');
+  chiudiImpostazioni();
+  msg(`Tutti i dati locali di ${utente} sono stati cancellati.`);
 }
 
 function esportaCSV(){
-  const dati = getData();
+  const utente = getUtente().trim();
+  if (!utente){
+    msg('Prima salva il nome utente nelle impostazioni.', false);
+    apriImpostazioni();
+    return;
+  }
+
+  const dati = getData().filter(r => r.utente === utente);
 
   if (!dati.length){
     msg('Nessun dato da esportare.', false);
@@ -854,6 +965,7 @@ function esportaCSV(){
   }
 
   const rows = [[
+    'Utente',
     'Data',
     'Glicemia colazione',
     'Insulina colazione',
@@ -873,6 +985,7 @@ function esportaCSV(){
     .sort((a,b) => a.data.localeCompare(b.data))
     .forEach(r => {
       rows.push([
+        r.utente || '',
         r.data || '',
         r.glicemiaColazione || '',
         r.insulinaColazione || '',
@@ -892,20 +1005,29 @@ function esportaCSV(){
     .map(r => r.map(v => `"${String(v).replaceAll('"','""')}"`).join(';'))
     .join('\n');
 
-  downloadBlob(new Blob([csv], { type:'text/csv;charset=utf-8;' }), 'diario_glicemie.csv');
+  const nomeFile = `${utente.replace(/\s+/g, '_')}_diario_glicemie.csv`;
+  downloadBlob(new Blob([csv], { type:'text/csv;charset=utf-8;' }), nomeFile);
   msg('CSV esportato.');
 }
 
 function creaBackupJSON(){
-  const dati = getData();
+  const utente = getUtente().trim();
+  if (!utente){
+    msg('Prima salva il nome utente nelle impostazioni.', false);
+    apriImpostazioni();
+    return;
+  }
+
+  const dati = getData().filter(r => r.utente === utente);
   if (!dati.length){
     msg('Nessun dato da salvare.', false);
     return;
   }
 
+  const nomeFile = `${utente.replace(/\s+/g, '_')}_backup_glicemie.json`;
   downloadBlob(
     new Blob([JSON.stringify(dati, null, 2)], { type:'application/json' }),
-    'backup_glicemie.json'
+    nomeFile
   );
   msg('Backup creato.');
 }
@@ -941,24 +1063,36 @@ Inserisci 1 oppure 2`
       }
 
       if (scelta === '1'){
-        const conferma = confirm('Tutti i dati attuali verranno sostituiti. Continuare?');
+        const conferma = confirm('I dati importati sostituiranno quelli dello stesso utente e delle stesse date. Continuare?');
         if (!conferma){
           event.target.value = '';
           return;
         }
 
-        setData(datiImportati);
+        let esistenti = getData();
+        datiImportati.forEach(nuovo => {
+          esistenti = esistenti.filter(r => !(r.utente === nuovo.utente && r.data === nuovo.data));
+        });
+        setData([...datiImportati, ...esistenti].sort((a,b) => b.data.localeCompare(a.data)));
         render();
         caricaOPulisciPerData();
         msg('Backup ripristinato.');
       } else if (scelta === '2'){
-        const datiAttuali = getData();
-        const nuoveDate = new Set(datiAttuali.map(r => r.data));
-        const nuovi = datiImportati.filter(r => !nuoveDate.has(r.data));
-        setData([...nuovi, ...datiAttuali].sort((a,b) => b.data.localeCompare(a.data)));
+        let esistenti = getData();
+        let aggiunti = 0;
+
+        datiImportati.forEach(nuovo => {
+          const trovato = esistenti.some(r => r.utente === nuovo.utente && r.data === nuovo.data);
+          if (!trovato){
+            esistenti.push(nuovo);
+            aggiunti++;
+          }
+        });
+
+        setData(esistenti.sort((a,b) => b.data.localeCompare(a.data)));
         render();
         caricaOPulisciPerData();
-        msg(`Unione completata: aggiunti ${nuovi.length} record.`);
+        msg(`Unione completata: aggiunti ${aggiunti} record.`);
       } else {
         msg('Scelta non valida.', false);
       }
@@ -996,10 +1130,13 @@ function sommaNumerica(valori){
 }
 
 function aggiornaRiepilogo(dati){
+  const utente = getUtente().trim();
+  const filtrati = dati.filter(r => r.utente === utente);
+
   const tutteGlicemie = [];
   const tutteInsuline = [];
 
-  dati.forEach(r => {
+  filtrati.forEach(r => {
     [
       r.glicemiaColazione,
       r.glicemiaDopoColazione,
@@ -1018,27 +1155,31 @@ function aggiornaRiepilogo(dati){
     ].forEach(v => tutteInsuline.push(v));
   });
 
+  document.getElementById('reportUtente').textContent = utente || '-';
   document.getElementById('mediaG').textContent = mediaNumerica(tutteGlicemie);
   document.getElementById('totaleI').textContent = sommaNumerica(tutteInsuline);
-  document.getElementById('numR').textContent = dati.length;
-  document.getElementById('ultimaData').textContent = dati.length ? dati[0].data : '-';
+  document.getElementById('numR').textContent = filtrati.length;
+  document.getElementById('ultimaData').textContent = filtrati.length ? filtrati[0].data : '-';
 }
 
 function renderTabellaGiornaliera(dati){
+  const utente = getUtente().trim();
+  const filtrati = dati.filter(r => r.utente === utente);
   const tbody = document.getElementById('tbodyDaily');
   tbody.innerHTML = '';
 
-  if (!dati.length){
-    tbody.innerHTML = '<tr><td colspan="12" class="empty">Nessun dato giornaliero.</td></tr>';
+  if (!filtrati.length){
+    tbody.innerHTML = '<tr><td colspan="13" class="empty">Nessun dato giornaliero.</td></tr>';
     return;
   }
 
-  dati
+  filtrati
     .slice()
     .sort((a,b) => b.data.localeCompare(a.data))
     .forEach(r => {
       const tr = document.createElement('tr');
       tr.innerHTML = `
+        <td>${r.utente || '-'}</td>
         <td>${r.data || '-'}</td>
         <td>${r.glicemiaColazione || '-'}</td>
         <td>${r.insulinaColazione || '-'}</td>
@@ -1057,20 +1198,23 @@ function renderTabellaGiornaliera(dati){
 }
 
 function renderTabellaDosi(dati){
+  const utente = getUtente().trim();
+  const filtrati = dati.filter(r => r.utente === utente);
   const tbody = document.getElementById('tbodyDosi');
   tbody.innerHTML = '';
 
-  if (!dati.length){
-    tbody.innerHTML = '<tr><td colspan="7" class="empty">Nessun dettaglio dose.</td></tr>';
+  if (!filtrati.length){
+    tbody.innerHTML = '<tr><td colspan="8" class="empty">Nessun dettaglio dose.</td></tr>';
     return;
   }
 
-  dati
+  filtrati
     .slice()
     .sort((a,b) => b.data.localeCompare(a.data))
     .forEach(r => {
       const tr = document.createElement('tr');
       tr.innerHTML = `
+        <td>${r.utente || '-'}</td>
         <td>${r.data || '-'}</td>
         <td>${r.doseConsigliataColazione || '-'}</td>
         <td>${r.doseConsigliataPranzo || '-'}</td>
@@ -1078,8 +1222,8 @@ function renderTabellaDosi(dati){
         <td>${r.doseConsigliataNotte || '-'}</td>
         <td>${r.insulinaNotte || '-'}</td>
         <td>
-          <button class="small-btn" style="background:#dbeafe;color:#1d4ed8;" onclick="caricaGiornata('${r.data}')">Carica</button>
-          <button class="small-btn" style="background:#fee2e2;color:#991b1b;" onclick="eliminaGiornata('${r.data}')">Elimina</button>
+          <button class="small-btn" style="background:#dbeafe;color:#1d4ed8;" onclick="caricaGiornata('${r.data}','${r.utente}')">Carica</button>
+          <button class="small-btn" style="background:#fee2e2;color:#991b1b;" onclick="eliminaGiornata('${r.utente}','${r.data}')">Elimina</button>
         </td>
       `;
       tbody.appendChild(tr);
@@ -1201,10 +1345,18 @@ document.getElementById('g_not').addEventListener('input', function(){
 document.getElementById('schemaBackdrop').addEventListener('click', function(e){
   if (e.target === this) chiudiSchema();
 });
+document.getElementById('impostazioniBackdrop').addEventListener('click', function(e){
+  if (e.target === this) chiudiImpostazioni();
+});
 
 document.getElementById('data').addEventListener('change', caricaOPulisciPerData);
 
+if (!getUtente()){
+  apriImpostazioni();
+}
+
 document.getElementById('data').value = oggi();
+aggiornaUtenteUI();
 caricaOPulisciPerData();
 aggiornaTutteLeDosi();
 render();
