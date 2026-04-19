@@ -484,7 +484,7 @@
     <div class="section-actions" style="margin-top:14px;">
       <button class="btn btn-soft" onclick="aggiungiRigaSchema()">Aggiungi riga</button>
       <button class="btn btn-primary" onclick="salvaSchema()">Salva schema</button>
-      <button class="btn btn-soft" onclick="ripristinaSchemaDefault()">Ripristina base</button>
+    <button class="btn btn-soft" onclick="ripristinaSchemaDefault()">Ripristina base</button>
     </div>
   </div>
 </div>
@@ -619,12 +619,12 @@ const SOGLIA_TARGET_MAX = 180;
 const SOGLIA_MOLTO_ALTA = 250;
 
 const SCHEMA_DEFAULT = [
-  { min: 80,  max: 120, col: 5,  pra: 6,  cen: 5,  not: 5 },
-  { min: 120, max: 160, col: 6,  pra: 7,  cen: 6,  not: 6 },
-  { min: 160, max: 200, col: 7,  pra: 8,  cen: 7,  not: 7 },
-  { min: 200, max: 240, col: 8,  pra: 9,  cen: 8,  not: 8 },
-  { min: 240, max: 280, col: 9,  pra: 10, cen: 9,  not: 9 },
-  { min: 280, max: 320, col: 10, pra: 11, cen: 10, not: 10 }
+  { min: 80,  max: 120, col: 3,  pra: 4,  cen: 3,  not: 10 },
+  { min: 120, max: 160, col: 4,  pra: 5,  cen: 4,  not: 10 },
+  { min: 160, max: 200, col: 5,  pra: 6,  cen: 5,  not: 10 },
+  { min: 200, max: 240, col: 5,  pra: 6,  cen: 6,  not: 10 },
+  { min: 240, max: 280, col: 6,  pra: 7, cen: 7,  not: 10 },
+  { min: 280, max: 320, col: 7,  pra: 8, cen: 8, not: 10 }
 ];
 
 const medicalBandsPlugin = {
