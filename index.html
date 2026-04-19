@@ -988,27 +988,41 @@ function syncLocaleDaCloudRealtime(){
     stopCloudRealtime = window.cloudApi.ascoltaGiornateRealtime(paziente, (datiCloud) => {
       if (!Array.isArray(datiCloud)) return;
 
-      const attualiPaziente = getData().filter(r => r.paziente === paziente);
-      const jsonPrima = JSON.stringify(attualiPaziente.slice().sort((a,b) => String(a.data).localeCompare(String(b.data))));
-      const jsonDopo = JSON.stringify(datiCloud.slice().sort((a,b) => String(a.data).localeCompare(String(b.data))));
-      const cambiati = jsonPrima !== jsonDopo;
+      let locali = getData();
+      let map = {};
 
-      const altriPazienti = getData().filter(r => r.paziente !== paziente);
-      const uniti = [...datiCloud, ...altriPazienti].sort((a,b) => String(b.data).localeCompare(String(a.data)));
+      // 🔥 MERGE CORRETTO (RISOLVE IL BUG)
+      [...locali, ...datiCloud].forEach(r => {
+
+        const key = chiaveRecord(r);
+
+        if (!map[key]) {
+          map[key] = r;
+        } else {
+          for (let k in r) {
+            if (
+              map[key][k] === '' ||
+              map[key][k] === null ||
+              map[key][k] === undefined
+            ) {
+              map[key][k] = r[k];
+            }
+          }
+        }
+
+      });
+
+      const uniti = Object.values(map)
+        .sort((a,b) => String(b.data).localeCompare(String(a.data)));
 
       setData(uniti);
+
       render();
       caricaOPulisciPerData();
 
-      if (cambiati && !syncSilenziosaIniziale){
-        aggiornaStatoSync('☁️ Nuovi dati sincronizzati');
-        msg('Nuovi dati arrivati dal cloud.');
-      } else {
-        aggiornaStatoSync('☁️ Sync aggiornata');
-      }
-
-      syncSilenziosaIniziale = false;
+      aggiornaStatoSync('☁️ Sync OK');
     });
+
   } catch(err){
     console.error('Errore realtime cloud:', err);
     msg('Cloud realtime non disponibile.', false);
