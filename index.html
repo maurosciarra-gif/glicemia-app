@@ -1,2018 +1,283 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>Glicemia App PRO</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <link rel="manifest" href="manifest.json">
-  <meta name="theme-color" content="#3b82f6">
-  <link rel="apple-touch-icon" href="icon-192.png">
+<title>Glicemia PRO</title>
 
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/jspdf-autotable@3.8.2/dist/jspdf.plugin.autotable.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
-  <style>
-    :root{
-      --bg:#efefef;
-      --blue:#3b82f6;
-      --green:#0f766e;
-      --text:#111827;
-      --muted:#6b7280;
-      --danger:#dc2626;
-      --danger-bg:#fee2e2;
-      --warn:#b45309;
-      --warn-bg:#fef3c7;
-      --ok:#16a34a;
-      --ok-bg:#dcfce7;
-      --shadow:0 10px 24px rgba(0,0,0,.08);
-    }
-    *{ box-sizing:border-box; }
-    body{
-      margin:0;
-      font-family:Arial, Helvetica, sans-serif;
-      background:var(--bg);
-      color:var(--text);
-    }
-    .app{
-      max-width:540px;
-      margin:0 auto;
-      padding:16px 14px 28px;
-    }
-    .title{
-      text-align:center;
-      font-size:28px;
-      font-weight:800;
-      margin:8px 0 8px;
-    }
-    .subtitle{
-      text-align:center;
-      color:var(--muted);
-      font-size:14px;
-      margin:0 0 8px;
-      font-weight:700;
-    }
-    .topbar{
-      display:flex;
-      gap:10px;
-      margin-bottom:12px;
-    }
-    .topbar button{
-      flex:1;
-      min-height:52px;
-      border:none;
-      border-radius:16px;
-      background:var(--blue);
-      color:#fff;
-      font-size:16px;
-      font-weight:700;
-      box-shadow:var(--shadow);
-      cursor:pointer;
-    }
-    .datebox{
-      margin-bottom:14px;
-    }
-    .datebox input{
-      width:100%;
-      min-height:54px;
-      border:2px solid #d4d4d4;
-      border-radius:16px;
-      padding:10px 14px;
-      font-size:18px;
-      background:#fff;
-    }
-    .card{
-      border-radius:24px;
-      padding:18px 16px 16px;
-      margin-bottom:16px;
-      box-shadow:var(--shadow);
-    }
-    .card-colazione{ background:#cfe7f7; }
-    .card-pranzo{ background:#f3e1c8; }
-    .card-cena{ background:#e7ddfa; }
-    .card-notte{ background:#dde7f5; }
-    .meal-title{
-      font-size:24px;
-      font-weight:800;
-      margin:0 0 16px;
-    }
-    .field{
-      width:100%;
-      min-height:56px;
-      border:3px solid rgba(46,46,46,.12);
-      border-radius:16px;
-      padding:10px 14px;
-      font-size:18px;
-      background:#fff;
-      outline:none;
-      margin-bottom:10px;
-      transition:opacity .15s ease;
-    }
-    .field:focus{
-      border-color:#3b82f6;
-      box-shadow:0 0 0 4px rgba(59,130,246,.12);
-    }
-    .dose{
-      font-size:19px;
-      font-weight:800;
-      color:var(--green);
-      margin:4px 0 10px;
-    }
-    .dose small{
-      font-weight:700;
-      opacity:.95;
-    }
-    .warning-box{
-      min-height:20px;
-      font-size:14px;
-      font-weight:700;
-      margin:4px 0 10px;
-      padding:10px 12px;
-      border-radius:12px;
-      display:none;
-    }
-    .warning-low{
-      display:block;
-      background:var(--danger-bg);
-      color:#991b1b;
-    }
-    .warning-high{
-      display:block;
-      background:var(--warn-bg);
-      color:#92400e;
-    }
-    .section-actions{
-      display:grid;
-      grid-template-columns:1fr 1fr;
-      gap:10px;
-      margin:14px 0;
-    }
-    .btn{
-      min-height:48px;
-      border:none;
-      border-radius:16px;
-      padding:10px 12px;
-      font-size:15px;
-      font-weight:800;
-      cursor:pointer;
-    }
-    .btn-primary{ background:var(--blue); color:#fff; }
-    .btn-soft{ background:#dbeafe; color:#1d4ed8; }
-    .btn-danger{ background:var(--danger-bg); color:#991b1b; }
-    .btn-gray{ background:#e5e7eb; color:#111827; }
-    .btn:disabled{
-      opacity:.6;
-      cursor:not-allowed;
-    }
-    .message{
-      min-height:22px;
-      font-size:14px;
-      font-weight:700;
-      margin:8px 2px 12px;
-      color:var(--ok);
-    }
-    .note{
-      font-size:13px;
-      color:var(--muted);
-      margin-top:6px;
-      line-height:1.35;
-    }
-    .panel{
-      background:#fff;
-      border-radius:22px;
-      box-shadow:var(--shadow);
-      padding:16px;
-      margin-top:16px;
-    }
-    .panel h2{
-      margin:0 0 12px;
-      font-size:20px;
-    }
-    .summary{
-      display:grid;
-      grid-template-columns:1fr 1fr;
-      gap:10px;
-      margin-bottom:12px;
-    }
-    .summary-box{
-      background:#f9fafb;
-      border:1px solid #e5e7eb;
-      border-radius:16px;
-      padding:12px;
-    }
-    .summary-box span{
-      display:block;
-      color:var(--muted);
-      font-size:13px;
-      margin-bottom:4px;
-    }
-    .summary-box strong{
-      font-size:20px;
-    }
-    .table-wrap{
-      overflow:auto;
-      border:1px solid #e5e7eb;
-      border-radius:16px;
-      margin-top:10px;
-      background:#fff;
-    }
-    table{
-      width:100%;
-      border-collapse:collapse;
-      min-width:920px;
-    }
-    th, td{
-      text-align:left;
-      padding:10px 8px;
-      border-bottom:1px solid #e5e7eb;
-      font-size:14px;
-      vertical-align:middle;
-    }
-    th{
-      background:#f9fafb;
-    }
-    .small-btn{
-      min-height:34px;
-      padding:6px 10px;
-      border:none;
-      border-radius:10px;
-      font-size:13px;
-      font-weight:700;
-      cursor:pointer;
-      margin-right:6px;
-    }
-    .empty{
-      padding:18px;
-      text-align:center;
-      color:var(--muted);
-    }
-    .status-ok{ color:var(--ok); }
-    .status-off{ color:var(--danger); }
-    .modal-backdrop{
-      position:fixed;
-      inset:0;
-      background:rgba(0,0,0,.45);
-      display:none;
-      align-items:center;
-      justify-content:center;
-      padding:16px;
-      z-index:1000;
-    }
-    .modal{
-      width:min(900px, 100%);
-      max-height:88vh;
-      overflow:auto;
-      background:#fff;
-      border-radius:24px;
-      box-shadow:0 20px 50px rgba(0,0,0,.25);
-      padding:18px;
-    }
-    .modal-top{
-      display:flex;
-      justify-content:space-between;
-      align-items:center;
-      gap:10px;
-      margin-bottom:12px;
-    }
-    .schema-input{
-      width:100%;
-      min-height:42px;
-      border:1px solid #d1d5db;
-      border-radius:10px;
-      padding:8px 10px;
-      font-size:15px;
-    }
-    .hidden{ display:none !important; }
-  </style>
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js"></script>
+
+<style>
+body {
+    font-family: Arial;
+    background: #f4f4f4;
+    padding: 10px;
+}
+
+.card {
+    background: white;
+    padding: 12px;
+    margin: 10px 0;
+    border-radius: 10px;
+}
+
+input {
+    width: 100%;
+    padding: 8px;
+    margin: 4px 0;
+}
+
+button {
+    padding: 10px;
+    margin: 5px 0;
+    width: 100%;
+    border: none;
+    border-radius: 8px;
+    background: #007bff;
+    color: white;
+}
+
+h2 { text-align: center; }
+</style>
 </head>
+
 <body>
 
-<div id="homePage">
-  <div class="app">
-    <div class="title">📊 Glicemia App PRO</div>
-    <div id="pazienteAttivoBox" class="subtitle">Paziente attivo: -</div>
-    <div id="statoConnessione" class="subtitle">🌐 Stato: online</div>
-    <div id="statoSync" class="subtitle">☁️ Sync: pronta</div>
+<h2>Glicemia PRO</h2>
 
-    <div class="datebox">
-      <input id="data" type="date" />
-    </div>
+<div class="card">
+<input id="paziente" placeholder="Nome Paziente">
+<input type="date" id="data">
 
-    <div class="topbar">
-      <button type="button" onclick="impostaOggi()">📅 Oggi</button>
-      <button type="button" onclick="impostaIeri()">◀️ Ieri</button>
-    </div>
+<input id="glicemiaColazione" placeholder="Glicemia Colazione">
+<input id="insulinaColazione" placeholder="Insulina Colazione">
+<input id="glicemiaDopoColazione" placeholder="Dopo Colazione">
 
-    <div class="topbar">
-      <button type="button" onclick="apriReport()">📋 Report</button>
-      <button type="button" onclick="apriImpostazioni()">👤 Impostazioni</button>
-    </div>
+<input id="glicemiaPranzo" placeholder="Glicemia Pranzo">
+<input id="insulinaPranzo" placeholder="Insulina Pranzo">
+<input id="glicemiaDopoPranzo" placeholder="Dopo Pranzo">
 
-    <div class="card card-colazione">
-      <div class="meal-title">🌅 Colazione</div>
-      <input id="g_col" class="field" type="number" inputmode="decimal" placeholder="Glicemia colazione" />
-      <div id="warn_g_col" class="warning-box"></div>
-      <div id="dose_col" class="dose">💉 <small>Dose consigliata:</small> -</div>
-      <input id="i_col" class="field" type="number" inputmode="decimal" placeholder="Insulina colazione" />
-      <input id="g_col_post" class="field" type="number" inputmode="decimal" placeholder="Glicemia dopo colazione" />
-    </div>
+<input id="glicemiaCena" placeholder="Glicemia Cena">
+<input id="insulinaCena" placeholder="Insulina Cena">
+<input id="glicemiaDopoCena" placeholder="Dopo Cena">
 
-    <div class="card card-pranzo">
-      <div class="meal-title">🌞 Pranzo</div>
-      <input id="g_pra" class="field" type="number" inputmode="decimal" placeholder="Glicemia pranzo" />
-      <div id="warn_g_pra" class="warning-box"></div>
-      <div id="dose_pra" class="dose">💉 <small>Dose consigliata:</small> -</div>
-      <input id="i_pra" class="field" type="number" inputmode="decimal" placeholder="Insulina pranzo" />
-      <input id="g_pra_post" class="field" type="number" inputmode="decimal" placeholder="Glicemia dopo pranzo" />
-    </div>
+<input id="insulinaNotte" placeholder="Insulina Notte">
 
-    <div class="card card-cena">
-      <div class="meal-title">🌙 Cena</div>
-      <input id="g_cen" class="field" type="number" inputmode="decimal" placeholder="Glicemia cena" />
-      <div id="warn_g_cen" class="warning-box"></div>
-      <div id="dose_cen" class="dose">💉 <small>Dose consigliata:</small> -</div>
-      <input id="i_cen" class="field" type="number" inputmode="decimal" placeholder="Insulina cena" />
-      <input id="g_cen_post" class="field" type="number" inputmode="decimal" placeholder="Glicemia dopo cena" />
-      <div id="warn_g_cen_post" class="warning-box"></div>
-    </div>
+<button onclick="salva()">SALVA</button>
+<button onclick="syncCloud()">SINCRONIZZA CLOUD</button>
+<button onclick="exportPDF()">EXPORT PDF</button>
 
-    <div class="card card-notte">
-      <div class="meal-title">🌌 Notte</div>
-      <div id="dose_not" class="dose">💉 <small>Dose consigliata:</small> -</div>
-      <input id="i_not" class="field" type="number" inputmode="decimal" placeholder="Insulina notte" />
-    </div>
-
-    <div class="section-actions">
-      <button id="btnSalva" class="btn btn-primary" onclick="salvaGiornata()">Salva giornata</button>
-      <button id="btnSblocca" class="btn btn-soft" onclick="sbloccaModifica()" disabled>Sblocca modifica</button>
-    </div>
-
-    <div class="note">
-      Giornata esistente: i campi già compilati sono bloccati, i campi vuoti restano liberi.<br>
-      La dose notte viene calcolata usando <strong>glicemia dopo cena</strong>.<br>
-      Premi <strong>Sblocca modifica</strong> solo se vuoi cambiare un valore già salvato.<br>
-      Per azzerare un valore, scrivi <strong>0</strong>.
-    </div>
-
-    <input
-      id="fileRipristino"
-      type="file"
-      accept=".json,application/json"
-      class="hidden"
-      onchange="ripristinaBackup(event)"
-    />
-
-    <div id="msg" class="message"></div>
-  </div>
+<input type="file" onchange="importJSON(event)">
 </div>
 
-<div id="reportPage" class="hidden">
-  <div class="app">
-    <div class="title">📊 Report Glicemia</div>
-
-    <div class="topbar">
-      <button onclick="tornaHome()">⬅ Torna</button>
-      <button onclick="esportaDaReport()">Esporta</button>
-    </div>
-
-    <div class="panel">
-      <h2>Grafico glicemia</h2>
-      <div class="topbar" style="margin-bottom:10px;">
-        <button onclick="aggiornaGrafico(7)">7 giorni</button>
-        <button onclick="aggiornaGrafico(30)">30 giorni</button>
-        <button onclick="aggiornaGrafico(90)">90 giorni</button>
-      </div>
-      <canvas id="graficoGlicemia" height="150"></canvas>
-      <div class="note">
-        Fasce medico-grafiche: rosso basso, verde target, giallo alto, rosso molto alto.
-      </div>
-    </div>
-
-    <div class="panel">
-      <h2>Riepilogo</h2>
-      <div class="summary">
-        <div class="summary-box">
-          <span>Paziente</span>
-          <strong id="reportPaziente">-</strong>
-        </div>
-        <div class="summary-box">
-          <span>Media glicemia</span>
-          <strong id="mediaG">-</strong>
-        </div>
-        <div class="summary-box">
-          <span>Totale insulina</span>
-          <strong id="totaleI">-</strong>
-        </div>
-        <div class="summary-box">
-          <span>Giorni registrati</span>
-          <strong id="numR">0</strong>
-        </div>
-      </div>
-    </div>
-
-    <div class="panel">
-      <h2>Storico giornaliero</h2>
-      <div class="table-wrap">
-        <table>
-          <thead>
-            <tr>
-              <th>Data</th>
-              <th>Colazione</th>
-              <th>Pranzo</th>
-              <th>Cena</th>
-              <th>Dopo cena</th>
-              <th>Insulina totale</th>
-            </tr>
-          </thead>
-          <tbody id="tbodyReport"></tbody>
-        </table>
-      </div>
-    </div>
-
-    <div class="panel">
-      <h2>Dettaglio dose consigliata</h2>
-      <div class="table-wrap">
-        <table>
-          <thead>
-            <tr>
-              <th>Paziente</th>
-              <th>Data</th>
-              <th>Dose colazione</th>
-              <th>Dose pranzo</th>
-              <th>Dose cena</th>
-              <th>Dose notte</th>
-              <th>Insulina notte</th>
-              <th>Azioni</th>
-            </tr>
-          </thead>
-          <tbody id="tbodyDosi"></tbody>
-        </table>
-      </div>
-    </div>
-  </div>
-</div>
-
-<div id="schemaBackdrop" class="modal-backdrop">
-  <div class="modal">
-    <div class="modal-top">
-      <h2>Schema Terapia</h2>
-      <button class="btn btn-gray" onclick="chiudiSchema()">Chiudi</button>
-    </div>
-
-    <p style="margin-top:0;color:#6b7280;">
-      Ogni paziente ha il suo schema terapia personalizzato. Le modifiche vengono salvate anche nel cloud.
-    </p>
-
-    <div class="table-wrap">
-      <table>
-        <thead>
-          <tr>
-            <th>Da</th>
-            <th>A</th>
-            <th>Colazione</th>
-            <th>Pranzo</th>
-            <th>Cena</th>
-            <th>Notte</th>
-            <th>Azione</th>
-          </tr>
-        </thead>
-        <tbody id="tbodySchema"></tbody>
-      </table>
-    </div>
-
-    <div class="section-actions" style="margin-top:14px;">
-      <button class="btn btn-soft" onclick="aggiungiRigaSchema()">Aggiungi riga</button>
-      <button class="btn btn-primary" onclick="salvaSchema()">Salva schema</button>
-      <button class="btn btn-soft" onclick="ripristinaSchemaDefault()">Ripristina base</button>
-    </div>
-  </div>
-</div>
-
-<div id="impostazioniBackdrop" class="modal-backdrop">
-  <div class="modal">
-    <div class="modal-top">
-      <h2>Impostazioni paziente</h2>
-      <button class="btn btn-gray" onclick="chiudiImpostazioni()">Chiudi</button>
-    </div>
-
-    <label for="nomePazienteInput" style="font-weight:800; display:block; margin-bottom:8px;">
-      Nome paziente
-    </label>
-    <input id="nomePazienteInput" class="field" type="text" placeholder="Es. Armando" />
-
-    <div class="section-actions">
-      <button class="btn btn-primary" onclick="salvaPaziente()">Salva profilo</button>
-      <button class="btn btn-soft" onclick="apriSchema()">Schema Terapia</button>
-      <button class="btn btn-soft" onclick="creaBackupJSON()">Backup</button>
-      <button class="btn btn-soft" onclick="document.getElementById('fileRipristino').click()">Ripristina da file</button>
-      <button class="btn btn-soft" onclick="forzaSyncCloud()">Sincronizza dal cloud</button>
-      <button class="btn btn-danger" onclick="svuotaTuttoConferma()">Svuota tutto</button>
-    </div>
-
-    <div class="note">
-      “Svuota tutto” cancella tutti i dati locali del paziente attivo salvati nel browser.<br>
-      I file già esportati o scaricati non vengono cancellati.
-    </div>
-  </div>
-</div>
+<canvas id="grafico"></canvas>
 
 <script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-  import {
-    getFirestore,
-    collection,
-    setDoc,
-    doc,
-    deleteDoc,
-    getDoc,
-    getDocs,
-    query,
-    where,
-    onSnapshot
-  } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-  const firebaseConfig = {
-    apiKey: "AIzaSyD4qS60jZ9x8ySuDy2HpgI-m4HLbxFBFNQ",
-    authDomain: "glicemia-app-b1611.firebaseapp.com",
-    projectId: "glicemia-app-b1611",
-    storageBucket: "glicemia-app-b1611.firebasestorage.app",
-    messagingSenderId: "892768422000",
-    appId: "1:892768422000:web:da09449b0803639c4c4cb5",
-    measurementId: "G-VZ7B26DXGV"
-  };
-
-  const app = initializeApp(firebaseConfig);
-  const db = getFirestore(app);
-
-  function makeDocId(paziente, data) {
-    return `${paziente}__${data}`.replace(/[^\w\-]/g, "_");
-  }
-
-  function makeSchemaId(paziente){
-    return `${paziente}`.replace(/[^\w\-]/g, "_");
-  }
-
-  window.cloudApi = {
-    async salvaGiornata(record) {
-      const id = makeDocId(record.paziente, record.data);
-      await setDoc(doc(db, "glicemia_records", id), record);
-    },
-
-    async eliminaGiornata(paziente, data) {
-      const id = makeDocId(paziente, data);
-      await deleteDoc(doc(db, "glicemia_records", id));
-    },
-
-    ascoltaGiornateRealtime(paziente, callback) {
-      const q = query(
-        collection(db, "glicemia_records"),
-        where("paziente", "==", paziente)
-      );
-
-      return onSnapshot(q, (snap) => {
-        const dati = snap.docs.map(d => d.data());
-        callback(dati);
-      });
-    },
-
-    async caricaTutteLeGiornatePaziente(paziente){
-      const q = query(
-        collection(db, "glicemia_records"),
-        where("paziente", "==", paziente)
-      );
-      const snap = await getDocs(q);
-      return snap.docs.map(d => d.data());
-    },
-
-    async salvaSchemaPaziente(paziente, schema) {
-      const id = makeSchemaId(paziente);
-      await setDoc(doc(db, "glicemia_schemi", id), {
-        paziente,
-        schema
-      });
-    },
-
-    async caricaSchemaPaziente(paziente) {
-      const id = makeSchemaId(paziente);
-      const snap = await getDoc(doc(db, "glicemia_schemi", id));
-      if (!snap.exists()) return null;
-      return snap.data();
-    }
-  };
-</script>
-
-<script>
-const KEY = 'glicemia_diario_paziente_v1';
-const KEY_SCHEMA_BASE = 'glicemia_schema_terapia_paziente_v1';
-const KEY_PAZIENTE = 'glicemia_paziente_attivo_v1';
-
-let salvataggioInCorso = false;
-let modificaSbloccata = false;
-let stopCloudRealtime = null;
-let graficoGlicemia = null;
-let ultimoRecordCaricato = null;
-let syncSilenziosaIniziale = true;
-
-const SOGLIA_BASSA = 70;
-const SOGLIA_TARGET_MAX = 180;
-const SOGLIA_MOLTO_ALTA = 250;
-
-const SCHEMA_DEFAULT = [
-  { min: 80,  max: 120, col: 5,  pra: 6,  cen: 5,  not: 5 },
-  { min: 120, max: 160, col: 6,  pra: 7,  cen: 6,  not: 6 },
-  { min: 160, max: 200, col: 7,  pra: 8,  cen: 7,  not: 7 },
-  { min: 200, max: 240, col: 8,  pra: 9,  cen: 8,  not: 8 },
-  { min: 240, max: 280, col: 9,  pra: 10, cen: 9,  not: 9 },
-  { min: 280, max: 320, col: 10, pra: 11, cen: 10, not: 10 }
-];
-
-const medicalBandsPlugin = {
-  id: 'medicalBandsPlugin',
-  beforeDraw(chart) {
-    const { ctx, chartArea, scales } = chart;
-    if (!chartArea || !scales?.y) return;
-
-    const { left, right } = chartArea;
-    const y = scales.y;
-
-    const drawBand = (from, to, color) => {
-      const yTop = y.getPixelForValue(to);
-      const yBottom = y.getPixelForValue(from);
-      ctx.save();
-      ctx.fillStyle = color;
-      ctx.fillRect(left, yTop, right - left, yBottom - yTop);
-      ctx.restore();
-    };
-
-    drawBand(0, SOGLIA_BASSA, 'rgba(239, 68, 68, 0.15)');
-    drawBand(SOGLIA_BASSA, SOGLIA_TARGET_MAX, 'rgba(34, 197, 94, 0.15)');
-    drawBand(SOGLIA_TARGET_MAX, SOGLIA_MOLTO_ALTA, 'rgba(245, 158, 11, 0.15)');
-    drawBand(SOGLIA_MOLTO_ALTA, 400, 'rgba(239, 68, 68, 0.15)');
-  }
+// 🔥 CONFIG FIREBASE (INSERISCI I TUOI DATI)
+const firebaseConfig = {
+    apiKey: "TUO_API_KEY",
+    authDomain: "TUO_DOMINIO",
+    projectId: "TUO_PROJECT_ID"
 };
 
-Chart.register(medicalBandsPlugin);
+const app = firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
 
-function oggi(){
-  const d = new Date();
-  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+// ==========================
+// STORAGE
+// ==========================
+
+function getLocal() {
+    return JSON.parse(localStorage.getItem("glicemia") || "[]");
 }
 
-function ieri(){
-  const d = new Date();
-  d.setDate(d.getDate() - 1);
-  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+function setLocal(data) {
+    localStorage.setItem("glicemia", JSON.stringify(data));
 }
 
-function impostaOggi(){
-  document.getElementById('data').value = oggi();
-  caricaOPulisciPerData();
+// ==========================
+// SALVATAGGIO
+// ==========================
+
+function getVal(id) {
+    let v = document.getElementById(id).value;
+    return v === "" ? null : v;
 }
 
-function impostaIeri(){
-  document.getElementById('data').value = ieri();
-  caricaOPulisciPerData();
-}
+function salva() {
 
-function getPaziente(){
-  return localStorage.getItem(KEY_PAZIENTE) || '';
-}
+    let record = {
+        paziente: getVal("paziente"),
+        data: getVal("data"),
 
-function setPaziente(nome){
-  localStorage.setItem(KEY_PAZIENTE, nome);
-}
+        glicemiaColazione: getVal("glicemiaColazione"),
+        insulinaColazione: getVal("insulinaColazione"),
+        glicemiaDopoColazione: getVal("glicemiaDopoColazione"),
 
-function getSchemaKeyPerPaziente(){
-  const paziente = getPaziente().trim();
-  return `${KEY_SCHEMA_BASE}_${paziente || 'default'}`;
-}
+        glicemiaPranzo: getVal("glicemiaPranzo"),
+        insulinaPranzo: getVal("insulinaPranzo"),
+        glicemiaDopoPranzo: getVal("glicemiaDopoPranzo"),
 
-function getSchema(){
-  try{
-    const key = getSchemaKeyPerPaziente();
-    const dati = JSON.parse(localStorage.getItem(key));
-    return Array.isArray(dati) && dati.length ? dati : SCHEMA_DEFAULT;
-  }catch(e){
-    return SCHEMA_DEFAULT;
-  }
-}
+        glicemiaCena: getVal("glicemiaCena"),
+        insulinaCena: getVal("insulinaCena"),
+        glicemiaDopoCena: getVal("glicemiaDopoCena"),
 
-function setSchema(schema){
-  const key = getSchemaKeyPerPaziente();
-  localStorage.setItem(key, JSON.stringify(schema));
-}
-
-function aggiornaPazienteUI(){
-  const paziente = getPaziente();
-  document.getElementById('pazienteAttivoBox').textContent = `Paziente attivo: ${paziente || '-'}`;
-  document.getElementById('reportPaziente').textContent = paziente || '-';
-  document.getElementById('nomePazienteInput').value = paziente;
-}
-
-function salvaPaziente(){
-  const nome = document.getElementById('nomePazienteInput').value.trim();
-  if (!nome){
-    msg('Inserisci un nome paziente.', false);
-    return;
-  }
-  setPaziente(nome);
-  aggiornaPazienteUI();
-  syncSilenziosaIniziale = true;
-  syncSchemaPazienteDaCloud();
-  syncLocaleDaCloudRealtime();
-  chiudiImpostazioni();
-  caricaOPulisciPerData();
-  render();
-  msg('Profilo paziente salvato.');
-}
-
-function apriImpostazioni(){
-  aggiornaPazienteUI();
-  document.getElementById('impostazioniBackdrop').style.display = 'flex';
-}
-
-function chiudiImpostazioni(){
-  document.getElementById('impostazioniBackdrop').style.display = 'none';
-}
-
-function apriSchema(){
-  renderSchema();
-  document.getElementById('schemaBackdrop').style.display = 'flex';
-}
-
-function chiudiSchema(){
-  document.getElementById('schemaBackdrop').style.display = 'none';
-}
-
-function apriReport(){
-  document.getElementById('homePage').classList.add('hidden');
-  document.getElementById('reportPage').classList.remove('hidden');
-  aggiornaReportCompleto();
-  setTimeout(() => aggiornaGrafico(7), 100);
-}
-
-function tornaHome(){
-  document.getElementById('reportPage').classList.add('hidden');
-  document.getElementById('homePage').classList.remove('hidden');
-}
-
-function getData(){
-  try{
-    return JSON.parse(localStorage.getItem(KEY)) || [];
-  }catch(e){
-    return [];
-  }
-}
-
-function setData(v){
-  localStorage.setItem(KEY, JSON.stringify(v));
-}
-
-function msg(t, ok=true){
-  const el = document.getElementById('msg');
-  el.style.color = ok ? 'var(--ok)' : 'var(--danger)';
-  el.textContent = t;
-  setTimeout(() => {
-    if (el.textContent === t) el.textContent = '';
-  }, 3200);
-}
-
-function numOrEmpty(v){
-  const t = String(v).trim();
-  if (t === '') return '';
-  const n = Number(t);
-  return Number.isNaN(n) ? '' : n;
-}
-
-function aggiornaStatoConnessione(){
-  const el = document.getElementById('statoConnessione');
-  if (!el) return;
-  el.textContent = navigator.onLine ? '🌐 Stato: online' : '📴 Stato: offline';
-  el.className = 'subtitle ' + (navigator.onLine ? 'status-ok' : 'status-off');
-}
-
-function aggiornaStatoSync(testo){
-  const el = document.getElementById('statoSync');
-  if (!el) return;
-  el.textContent = testo;
-}
-
-function creaTimestampIso(){
-  return new Date().toISOString();
-}
-
-function mostraAlertRange(inputId, warnId){
-  const val = Number(document.getElementById(inputId).value);
-  const el = document.getElementById(warnId);
-
-  if (!el) return;
-
-  if (Number.isNaN(val) || document.getElementById(inputId).value === ''){
-    el.style.display = 'none';
-    el.textContent = '';
-    el.className = 'warning-box';
-    return;
-  }
-
-  if (val < SOGLIA_BASSA){
-    el.style.display = 'block';
-    el.className = 'warning-box warning-low';
-    el.textContent = '⚠️ Glicemia bassa';
-  } else if (val > SOGLIA_MOLTO_ALTA){
-    el.style.display = 'block';
-    el.className = 'warning-box warning-high';
-    el.textContent = '⚠️ Glicemia molto alta';
-  } else if (val > SOGLIA_TARGET_MAX){
-    el.style.display = 'block';
-    el.className = 'warning-box warning-high';
-    el.textContent = '⚠️ Glicemia alta';
-  } else {
-    el.style.display = 'none';
-    el.textContent = '';
-    el.className = 'warning-box';
-  }
-}
-
-function chiaveRecord(r){
-  return `${(r.paziente || '').trim()}__${(r.data || '').trim()}`;
-}
-
-function normalizzaDataImport(raw){
-  if (raw === null || raw === undefined) return '';
-
-  let s = String(raw).trim();
-  if (!s) return '';
-
-  const matchIso = s.match(/^(\d{4}-\d{2}-\d{2})/);
-  if (matchIso) return matchIso[1];
-
-  const matchIt = s.match(/^(\d{1,2})\/(\d{1,2})(?:\/(\d{2,4}))?$/);
-  if (matchIt){
-    let dd = matchIt[1].padStart(2, '0');
-    let mm = matchIt[2].padStart(2, '0');
-    let yy = matchIt[3];
-
-    if (!yy){
-      yy = String(new Date().getFullYear());
-    } else if (yy.length === 2){
-      yy = `20${yy}`;
-    }
-    return `${yy}-${mm}-${dd}`;
-  }
-
-  const d = new Date(s);
-  if (!isNaN(d.getTime())){
-    const yyyy = d.getFullYear();
-    const mm = String(d.getMonth() + 1).padStart(2, '0');
-    const dd = String(d.getDate()).padStart(2, '0');
-    return `${yyyy}-${mm}-${dd}`;
-  }
-
-  return s;
-}
-
-function pulisciValoreImport(v){
-  if (v === null || v === undefined) return '';
-
-  if (typeof v === 'string'){
-    const s = v.trim();
-    if (s === '' || s.toLowerCase() === 'null' || s.toLowerCase() === 'nan') return '';
-    const n = Number(s.replace(',', '.'));
-    return Number.isNaN(n) ? s : n;
-  }
-
-  if (typeof v === 'number'){
-    return Number.isFinite(v) ? v : '';
-  }
-
-  return '';
-}
-
-function normalizzaRecordImport(record, pazienteAttivo){
-  return {
-    paziente: String(record.paziente || pazienteAttivo || '').trim(),
-    data: normalizzaDataImport(record.data),
-
-    glicemiaColazione: pulisciValoreImport(record.glicemiaColazione),
-    insulinaColazione: pulisciValoreImport(record.insulinaColazione),
-    glicemiaDopoColazione: pulisciValoreImport(record.glicemiaDopoColazione),
-
-    glicemiaPranzo: pulisciValoreImport(record.glicemiaPranzo),
-    insulinaPranzo: pulisciValoreImport(record.insulinaPranzo),
-    glicemiaDopoPranzo: pulisciValoreImport(record.glicemiaDopoPranzo),
-
-    glicemiaCena: pulisciValoreImport(record.glicemiaCena),
-    insulinaCena: pulisciValoreImport(record.insulinaCena),
-    glicemiaDopoCena: pulisciValoreImport(record.glicemiaDopoCena),
-
-    insulinaNotte: pulisciValoreImport(record.insulinaNotte),
-
-    doseConsigliataColazione: pulisciValoreImport(record.doseConsigliataColazione),
-    doseConsigliataPranzo: pulisciValoreImport(record.doseConsigliataPranzo),
-    doseConsigliataCena: pulisciValoreImport(record.doseConsigliataCena),
-    doseConsigliataNotte: pulisciValoreImport(record.doseConsigliataNotte),
-
-    ultimoAggiornamento: record.ultimoAggiornamento || new Date().toISOString()
-  };
-}
-
-function recordValidoPerImport(r){
-  return !!(r.paziente && r.data);
-}
-
-async function syncSchemaPazienteDaCloud(){
-  try{
-    const paziente = getPaziente().trim();
-    if (!paziente || !window.cloudApi) return;
-
-    const dati = await window.cloudApi.caricaSchemaPaziente(paziente);
-    if (dati && Array.isArray(dati.schema) && dati.schema.length){
-      setSchema(dati.schema);
-      aggiornaTutteLeDosi();
-    }
-  } catch(err){
-    console.error('Errore sync schema cloud:', err);
-  }
-}
-
-async function forzaSyncCloud(){
-  try{
-    const paziente = getPaziente().trim();
-    if (!paziente){
-      msg('Prima salva il nome paziente.', false);
-      return;
-    }
-
-    if (!window.cloudApi){
-      msg('Cloud non disponibile.', false);
-      return;
-    }
-
-    msg('Sincronizzazione in corso...');
-
-    const datiCloud = await window.cloudApi.caricaTutteLeGiornatePaziente(paziente);
-
-    if (!datiCloud.length){
-      msg('Nessun dato trovato nel cloud.', false);
-      return;
-    }
-
-    const conferma = confirm(`Sono stati trovati ${datiCloud.length} record nel cloud.
-
-Vuoi sostituire i dati locali?`);
-
-    if (!conferma) return;
-
-    const altri = getData().filter(r => r.paziente !== paziente);
-    setData([...datiCloud, ...altri].sort((a,b) => String(b.data).localeCompare(String(a.data))));
-
-    render();
-    caricaOPulisciPerData();
-    msg('Sincronizzazione cloud completata.');
-  } catch(err){
-    console.error(err);
-    msg('Errore durante sincronizzazione cloud.', false);
-  }
-}
-
-function syncLocaleDaCloudRealtime(){
-  try{
-    const paziente = getPaziente().trim();
-    if (!window.cloudApi || !paziente) return;
-
-    if (stopCloudRealtime){
-      stopCloudRealtime();
-    }
-
-    stopCloudRealtime = window.cloudApi.ascoltaGiornateRealtime(paziente, (datiCloud) => {
-      if (!Array.isArray(datiCloud)) return;
-
-      const attualiPaziente = getData().filter(r => r.paziente === paziente);
-      const jsonPrima = JSON.stringify(attualiPaziente.slice().sort((a,b) => String(a.data).localeCompare(String(b.data))));
-      const jsonDopo = JSON.stringify(datiCloud.slice().sort((a,b) => String(a.data).localeCompare(String(b.data))));
-      const cambiati = jsonPrima !== jsonDopo;
-
-      const altriPazienti = getData().filter(r => r.paziente !== paziente);
-      const uniti = [...datiCloud, ...altriPazienti].sort((a,b) => String(b.data).localeCompare(String(a.data)));
-
-      setData(uniti);
-      render();
-      caricaOPulisciPerData();
-
-      if (cambiati && !syncSilenziosaIniziale){
-        aggiornaStatoSync('☁️ Nuovi dati sincronizzati');
-        msg('Nuovi dati arrivati dal cloud.');
-      } else {
-        aggiornaStatoSync('☁️ Sync aggiornata');
-      }
-
-      syncSilenziosaIniziale = false;
-    });
-  } catch(err){
-    console.error('Errore realtime cloud:', err);
-    msg('Cloud realtime non disponibile.', false);
-  }
-}
-
-async function salvaGiornataSuCloud(record){
-  try{
-    if (!window.cloudApi) return;
-    await window.cloudApi.salvaGiornata(record);
-    aggiornaStatoSync('☁️ Salvato in cloud');
-  } catch(err){
-    console.error('Errore salvataggio cloud:', err);
-    msg('Errore cloud: ' + (err?.message || err), false);
-  }
-}
-
-async function eliminaGiornataDaCloud(paziente, data){
-  try{
-    if (!window.cloudApi) return;
-    await window.cloudApi.eliminaGiornata(paziente, data);
-  } catch(err){
-    console.error('Errore eliminazione cloud:', err);
-    msg('Eliminata in locale, ma errore cloud.', false);
-  }
-}
-
-function setCampiBloccatiPerRecord(record, forzaSblocco = false){
-  const campi = [
-    ['g_col', record?.glicemiaColazione],
-    ['i_col', record?.insulinaColazione],
-    ['g_col_post', record?.glicemiaDopoColazione],
-    ['g_pra', record?.glicemiaPranzo],
-    ['i_pra', record?.insulinaPranzo],
-    ['g_pra_post', record?.glicemiaDopoPranzo],
-    ['g_cen', record?.glicemiaCena],
-    ['i_cen', record?.insulinaCena],
-    ['g_cen_post', record?.glicemiaDopoCena],
-    ['i_not', record?.insulinaNotte]
-  ];
-
-  campi.forEach(([id, valore]) => {
-    const el = document.getElementById(id);
-
-    if (forzaSblocco){
-      el.readOnly = false;
-      el.style.opacity = '1';
-      return;
-    }
-
-    const haValore = valore !== '' && valore !== null && valore !== undefined;
-    el.readOnly = haValore;
-    el.style.opacity = haValore ? '0.78' : '1';
-  });
-
-  document.getElementById('btnSblocca').disabled = !record;
-}
-
-function sbloccaModifica(){
-  modificaSbloccata = true;
-  setCampiBloccatiPerRecord(null, true);
-  msg('Modifica completa sbloccata.');
-}
-
-function calcolaInsulina(glicemia, tipo){
-  const g = Number(glicemia);
-  if (Number.isNaN(g)) return '';
-
-  const schema = getSchema();
-  const fascia = schema.find(f => g >= Number(f.min) && g <= Number(f.max));
-  if (!fascia) return '';
-
-  if (tipo === 'col') return fascia.col;
-  if (tipo === 'pra') return fascia.pra;
-  if (tipo === 'cen') return fascia.cen;
-  if (tipo === 'not') return fascia.not;
-  return '';
-}
-
-function aggiornataDose(glicemia, tipo, doseVecchia){
-  if (glicemia === '' || glicemia === null || glicemia === undefined){
-    return doseVecchia || '';
-  }
-  const dose = calcolaInsulina(glicemia, tipo);
-  return dose !== '' ? dose : (doseVecchia || '');
-}
-
-function aggiornaDoseElemento(inputId, doseId, tipo){
-  const glicemia = document.getElementById(inputId).value;
-  const dose = calcolaInsulina(glicemia, tipo);
-  document.getElementById(doseId).innerText = dose
-    ? `💉 Dose consigliata: ${dose} U`
-    : '💉 Dose consigliata: -';
-}
-
-function aggiornaTutteLeDosi(){
-  aggiornaDoseElemento('g_col', 'dose_col', 'col');
-  aggiornaDoseElemento('g_pra', 'dose_pra', 'pra');
-  aggiornaDoseElemento('g_cen', 'dose_cen', 'cen');
-
-  const doseNotte = calcolaInsulina(document.getElementById('g_cen_post').value, 'not');
-  document.getElementById('dose_not').innerText = doseNotte
-    ? `💉 Dose consigliata: ${doseNotte} U`
-    : '💉 Dose consigliata: -';
-}
-
-function pulisciCampi(){
-  document.getElementById('g_col').value = '';
-  document.getElementById('i_col').value = '';
-  document.getElementById('g_col_post').value = '';
-
-  document.getElementById('g_pra').value = '';
-  document.getElementById('i_pra').value = '';
-  document.getElementById('g_pra_post').value = '';
-
-  document.getElementById('g_cen').value = '';
-  document.getElementById('i_cen').value = '';
-  document.getElementById('g_cen_post').value = '';
-
-  document.getElementById('i_not').value = '';
-
-  ultimoRecordCaricato = null;
-  modificaSbloccata = false;
-  setCampiBloccatiPerRecord(null, true);
-  aggiornaTutteLeDosi();
-
-  mostraAlertRange('g_col', 'warn_g_col');
-  mostraAlertRange('g_pra', 'warn_g_pra');
-  mostraAlertRange('g_cen', 'warn_g_cen');
-  mostraAlertRange('g_cen_post', 'warn_g_cen_post');
-}
-
-function caricaOPulisciPerData(){
-  const data = document.getElementById('data').value;
-  if (!data) return;
-
-  const paziente = getPaziente().trim();
-  const r = getData().find(x => normalizzaDataImport(x.data) === data && x.paziente === paziente);
-
-  if (!r){
-    ultimoRecordCaricato = null;
-    pulisciCampi();
-    return;
-  }
-
-  ultimoRecordCaricato = r;
-
-  document.getElementById('g_col').value = r.glicemiaColazione ?? '';
-  document.getElementById('i_col').value = r.insulinaColazione ?? '';
-  document.getElementById('g_col_post').value = r.glicemiaDopoColazione ?? '';
-
-  document.getElementById('g_pra').value = r.glicemiaPranzo ?? '';
-  document.getElementById('i_pra').value = r.insulinaPranzo ?? '';
-  document.getElementById('g_pra_post').value = r.glicemiaDopoPranzo ?? '';
-
-  document.getElementById('g_cen').value = r.glicemiaCena ?? '';
-  document.getElementById('i_cen').value = r.insulinaCena ?? '';
-  document.getElementById('g_cen_post').value = r.glicemiaDopoCena ?? '';
-
-  document.getElementById('i_not').value = r.insulinaNotte ?? '';
-
-  modificaSbloccata = false;
-  setCampiBloccatiPerRecord(r, false);
-  aggiornaTutteLeDosi();
-
-  mostraAlertRange('g_col', 'warn_g_col');
-  mostraAlertRange('g_pra', 'warn_g_pra');
-  mostraAlertRange('g_cen', 'warn_g_cen');
-  mostraAlertRange('g_cen_post', 'warn_g_cen_post');
-}
-
-function datiForm(){
-  const gCol = document.getElementById('g_col').value;
-  const gPra = document.getElementById('g_pra').value;
-  const gCen = document.getElementById('g_cen').value;
-  const gCenPost = document.getElementById('g_cen_post').value;
-
-  return {
-    paziente: getPaziente().trim(),
-    data: document.getElementById('data').value,
-
-    glicemiaColazione: numOrEmpty(gCol),
-    insulinaColazione: numOrEmpty(document.getElementById('i_col').value),
-    glicemiaDopoColazione: numOrEmpty(document.getElementById('g_col_post').value),
-
-    glicemiaPranzo: numOrEmpty(gPra),
-    insulinaPranzo: numOrEmpty(document.getElementById('i_pra').value),
-    glicemiaDopoPranzo: numOrEmpty(document.getElementById('g_pra_post').value),
-
-    glicemiaCena: numOrEmpty(gCen),
-    insulinaCena: numOrEmpty(document.getElementById('i_cen').value),
-    glicemiaDopoCena: numOrEmpty(gCenPost),
-
-    insulinaNotte: numOrEmpty(document.getElementById('i_not').value),
-
-    doseConsigliataColazione: calcolaInsulina(gCol, 'col'),
-    doseConsigliataPranzo: calcolaInsulina(gPra, 'pra'),
-    doseConsigliataCena: calcolaInsulina(gCen, 'cen'),
-    doseConsigliataNotte: calcolaInsulina(gCenPost, 'not'),
-
-    ultimoAggiornamento: creaTimestampIso()
-  };
-}
-
-function almenoUnValore(record){
-  return Object.entries(record).some(([k,v]) =>
-    k !== 'data' && k !== 'paziente' && k !== 'ultimoAggiornamento' && v !== ''
-  );
-}
-
-function recordCloudPiuRecente(recordLocale, recordCloud){
-  if (!recordLocale || !recordCloud) return false;
-
-  const tLocale = recordLocale.ultimoAggiornamento ? new Date(recordLocale.ultimoAggiornamento).getTime() : 0;
-  const tCloud = recordCloud.ultimoAggiornamento ? new Date(recordCloud.ultimoAggiornamento).getTime() : 0;
-
-  return tCloud > tLocale;
-}
-
-function salvaGiornata(){
-  const paziente = getPaziente().trim();
-  if (!paziente){
-    msg('Prima salva il nome paziente nelle impostazioni.', false);
-    apriImpostazioni();
-    return;
-  }
-
-  if (salvataggioInCorso) return;
-
-  salvataggioInCorso = true;
-  const btn = document.getElementById('btnSalva');
-  btn.disabled = true;
-
-  try{
-    const record = datiForm();
-
-    if (!record.data){
-      msg('Inserisci la data.', false);
-      return;
-    }
-
-    if (!almenoUnValore(record)){
-      msg('Inserisci almeno un valore.', false);
-      return;
-    }
-
-    const dati = getData();
-    const idx = dati.findIndex(r =>
-      normalizzaDataImport(r.data) === record.data &&
-      r.paziente === record.paziente
-    );
-
-    if (idx === -1){
-      const nuovo = { ...record };
-      setData([nuovo, ...dati].sort((a,b) => String(b.data).localeCompare(String(a.data))));
-      salvaGiornataSuCloud(nuovo);
-      modificaSbloccata = false;
-      setCampiBloccatiPerRecord(nuovo, false);
-      ultimoRecordCaricato = nuovo;
-      msg('Nuova giornata salvata.');
-      render();
-      return;
-    }
-
-    const esistente = dati[idx];
-    const recordCloudAttuale = getData().find(r =>
-      normalizzaDataImport(r.data) === record.data &&
-      r.paziente === record.paziente
-    );
-
-    if (ultimoRecordCaricato && recordCloudAttuale && recordCloudPiuRecente(ultimoRecordCaricato, recordCloudAttuale)){
-      msg('⚠️ Dati aggiornati da un altro dispositivo. Riapri la giornata prima di salvare.', false);
-      caricaOPulisciPerData();
-      return;
-    }
-
-    const staModificandoValoriEsistenti =
-      (record.glicemiaColazione !== '' && (esistente.glicemiaColazione ?? '') !== '' && record.glicemiaColazione !== Number(esistente.glicemiaColazione)) ||
-      (record.insulinaColazione !== '' && (esistente.insulinaColazione ?? '') !== '' && record.insulinaColazione !== Number(esistente.insulinaColazione)) ||
-      (record.glicemiaDopoColazione !== '' && (esistente.glicemiaDopoColazione ?? '') !== '' && record.glicemiaDopoColazione !== Number(esistente.glicemiaDopoColazione)) ||
-      (record.glicemiaPranzo !== '' && (esistente.glicemiaPranzo ?? '') !== '' && record.glicemiaPranzo !== Number(esistente.glicemiaPranzo)) ||
-      (record.insulinaPranzo !== '' && (esistente.insulinaPranzo ?? '') !== '' && record.insulinaPranzo !== Number(esistente.insulinaPranzo)) ||
-      (record.glicemiaDopoPranzo !== '' && (esistente.glicemiaDopoPranzo ?? '') !== '' && record.glicemiaDopoPranzo !== Number(esistente.glicemiaDopoPranzo)) ||
-      (record.glicemiaCena !== '' && (esistente.glicemiaCena ?? '') !== '' && record.glicemiaCena !== Number(esistente.glicemiaCena)) ||
-      (record.insulinaCena !== '' && (esistente.insulinaCena ?? '') !== '' && record.insulinaCena !== Number(esistente.insulinaCena)) ||
-      (record.glicemiaDopoCena !== '' && (esistente.glicemiaDopoCena ?? '') !== '' && record.glicemiaDopoCena !== Number(esistente.glicemiaDopoCena)) ||
-      (record.insulinaNotte !== '' && (esistente.insulinaNotte ?? '') !== '' && record.insulinaNotte !== Number(esistente.insulinaNotte));
-
-    if (staModificandoValoriEsistenti && !modificaSbloccata){
-      msg('Stai cercando di modificare valori già salvati. Premi "Sblocca modifica".', false);
-      return;
-    }
-
-    const scegli = (nuovo, vecchio) => nuovo !== '' ? nuovo : (vecchio ?? '');
-
-    const aggiornato = {
-      ...esistente,
-      paziente: record.paziente,
-      data: record.data,
-
-      glicemiaColazione: scegli(record.glicemiaColazione, esistente.glicemiaColazione),
-      insulinaColazione: scegli(record.insulinaColazione, esistente.insulinaColazione),
-      glicemiaDopoColazione: scegli(record.glicemiaDopoColazione, esistente.glicemiaDopoColazione),
-
-      glicemiaPranzo: scegli(record.glicemiaPranzo, esistente.glicemiaPranzo),
-      insulinaPranzo: scegli(record.insulinaPranzo, esistente.insulinaPranzo),
-      glicemiaDopoPranzo: scegli(record.glicemiaDopoPranzo, esistente.glicemiaDopoPranzo),
-
-      glicemiaCena: scegli(record.glicemiaCena, esistente.glicemiaCena),
-      insulinaCena: scegli(record.insulinaCena, esistente.insulinaCena),
-      glicemiaDopoCena: scegli(record.glicemiaDopoCena, esistente.glicemiaDopoCena),
-
-      insulinaNotte: scegli(record.insulinaNotte, esistente.insulinaNotte),
-
-      ultimoAggiornamento: record.ultimoAggiornamento
+        insulinaNotte: getVal("insulinaNotte")
     };
 
-    aggiornato.doseConsigliataColazione = aggiornataDose(aggiornato.glicemiaColazione, 'col', esistente.doseConsigliataColazione);
-    aggiornato.doseConsigliataPranzo = aggiornataDose(aggiornato.glicemiaPranzo, 'pra', esistente.doseConsigliataPranzo);
-    aggiornato.doseConsigliataCena = aggiornataDose(aggiornato.glicemiaCena, 'cen', esistente.doseConsigliataCena);
-    aggiornato.doseConsigliataNotte = aggiornataDose(aggiornato.glicemiaDopoCena, 'not', esistente.doseConsigliataNotte);
-
-    dati[idx] = aggiornato;
-    setData(dati.sort((a,b) => String(b.data).localeCompare(String(a.data))));
-    salvaGiornataSuCloud(aggiornato);
-
-    modificaSbloccata = false;
-    setCampiBloccatiPerRecord(aggiornato, false);
-    ultimoRecordCaricato = aggiornato;
-
-    msg('Giornata aggiornata correttamente.');
-    render();
-  } finally {
-    salvataggioInCorso = false;
-    btn.disabled = false;
-  }
-}
-
-function eliminaGiornata(paziente, data){
-  const conferma = confirm(`Vuoi eliminare la giornata ${data} di ${paziente}?`);
-  if (!conferma) return;
-
-  setData(getData().filter(r => !(normalizzaDataImport(r.data) === normalizzaDataImport(data) && r.paziente === paziente)));
-  eliminaGiornataDaCloud(paziente, normalizzaDataImport(data));
-  render();
-
-  if (document.getElementById('data').value === normalizzaDataImport(data) && getPaziente() === paziente){
-    pulisciCampi();
-  }
-
-  msg('Giornata eliminata.');
-}
-
-function caricaGiornata(data, paziente){
-  if (paziente && paziente !== getPaziente()){
-    setPaziente(paziente);
-    aggiornaPazienteUI();
-    syncSilenziosaIniziale = true;
-    syncSchemaPazienteDaCloud();
-    syncLocaleDaCloudRealtime();
-  }
-  document.getElementById('data').value = normalizzaDataImport(data);
-  caricaOPulisciPerData();
-  tornaHome();
-  window.scrollTo({ top: 0, behavior: 'smooth' });
-}
-
-function svuotaTuttoConferma(){
-  const paziente = getPaziente().trim();
-  if (!paziente){
-    msg('Nessun paziente attivo.', false);
-    return;
-  }
-
-  const conferma1 = confirm(`Vuoi cancellare tutti i dati locali del paziente "${paziente}"?`);
-  if (!conferma1) return;
-
-  const testo = prompt('Scrivi CANCELLA per confermare definitivamente.');
-  if (testo !== 'CANCELLA'){
-    msg('Cancellazione annullata.', false);
-    return;
-  }
-
-  const rimasti = getData().filter(r => r.paziente !== paziente);
-  setData(rimasti);
-
-  pulisciCampi();
-  render();
-  chiudiImpostazioni();
-  msg(`Tutti i dati locali di ${paziente} sono stati cancellati.`);
-}
-
-function esportaCSV(){
-  const paziente = getPaziente().trim();
-  if (!paziente){
-    msg('Prima salva il nome paziente nelle impostazioni.', false);
-    apriImpostazioni();
-    return;
-  }
-
-  const dati = getData().filter(r => r.paziente === paziente);
-
-  if (!dati.length){
-    msg('Nessun dato da esportare.', false);
-    return;
-  }
-
-  const rows = [[
-    'Paziente',
-    'Data',
-    'Glicemia colazione',
-    'Insulina colazione',
-    'Glicemia dopo colazione',
-    'Glicemia pranzo',
-    'Insulina pranzo',
-    'Glicemia dopo pranzo',
-    'Glicemia cena',
-    'Insulina cena',
-    'Glicemia dopo cena',
-    'Insulina notte'
-  ]];
-
-  dati.slice().sort((a,b) => String(a.data).localeCompare(String(b.data))).forEach(r => {
-    rows.push([
-      r.paziente || '',
-      normalizzaDataImport(r.data) || '',
-      r.glicemiaColazione || '',
-      r.insulinaColazione || '',
-      r.glicemiaDopoColazione || '',
-      r.glicemiaPranzo || '',
-      r.insulinaPranzo || '',
-      r.glicemiaDopoPranzo || '',
-      r.glicemiaCena || '',
-      r.insulinaCena || '',
-      r.glicemiaDopoCena || '',
-      r.insulinaNotte || ''
-    ]);
-  });
-
-  const csv = rows.map(r => r.map(v => `"${String(v).replaceAll('"','""')}"`).join(';')).join('\n');
-  const nomeFile = `${paziente.replace(/\s+/g, '_')}_diario_glicemie.csv`;
-  downloadBlob(new Blob([csv], { type:'text/csv;charset=utf-8;' }), nomeFile);
-  msg('CSV esportato.');
-}
-
-function creaBackupJSON(){
-  const paziente = getPaziente().trim();
-  if (!paziente){
-    msg('Prima salva il nome paziente nelle impostazioni.', false);
-    apriImpostazioni();
-    return;
-  }
-
-  const dati = getData().filter(r => r.paziente === paziente);
-  if (!dati.length){
-    msg('Nessun dato da salvare.', false);
-    return;
-  }
-
-  const nomeFile = `${paziente.replace(/\s+/g, '_')}_backup_glicemie.json`;
-  downloadBlob(new Blob([JSON.stringify(dati, null, 2)], { type:'application/json' }), nomeFile);
-  msg('Backup creato.');
-}
-
-function ripristinaBackup(event){
-  const file = event.target.files[0];
-  if (!file) return;
-
-  const reader = new FileReader();
-
-  reader.onload = function(e){
-    try{
-      const raw = JSON.parse(e.target.result);
-
-      if (!Array.isArray(raw)){
-        msg('File backup non valido.', false);
-        event.target.value = '';
+    if (!record.data) {
+        alert("Inserisci data");
         return;
-      }
-
-      const pazienteAttivo = getPaziente().trim();
-
-      if (!pazienteAttivo){
-        msg('Prima salva il nome paziente nelle impostazioni.', false);
-        event.target.value = '';
-        apriImpostazioni();
-        return;
-      }
-
-      const importatiNormalizzati = raw
-        .map(r => normalizzaRecordImport(r, pazienteAttivo))
-        .filter(recordValidoPerImport);
-
-      if (!importatiNormalizzati.length){
-        msg('Il file non contiene record validi.', false);
-        event.target.value = '';
-        return;
-      }
-
-      const scelta = prompt(
-`Come vuoi ripristinare il backup?
-
-1 = SOSTITUISCI TUTTO IL PAZIENTE ATTIVO
-2 = UNISCI DATI
-
-Inserisci 1 oppure 2`
-      );
-
-      if (!scelta){
-        event.target.value = '';
-        return;
-      }
-
-      let esistenti = getData();
-
-      if (scelta === '1'){
-        esistenti = esistenti.filter(r => r.paziente !== pazienteAttivo);
-
-        const importatiPaziente = importatiNormalizzati.map(r => ({
-          ...r,
-          paziente: pazienteAttivo
-        }));
-
-        const mappa = new Map();
-        importatiPaziente.forEach(r => mappa.set(chiaveRecord(r), r));
-
-        const finali = [...esistenti, ...Array.from(mappa.values())]
-          .sort((a,b) => String(b.data).localeCompare(String(a.data)));
-
-        setData(finali);
-        render();
-        caricaOPulisciPerData();
-        msg(`Backup ripristinato: ${mappa.size} record caricati.`);
-      }
-      else if (scelta === '2'){
-        const mappa = new Map();
-
-        esistenti.forEach(r => {
-          mappa.set(chiaveRecord({
-            ...r,
-            data: normalizzaDataImport(r.data)
-          }), {
-            ...r,
-            data: normalizzaDataImport(r.data)
-          });
-        });
-
-        importatiNormalizzati.forEach(r => {
-          const recordImport = {
-            ...r,
-            paziente: r.paziente || pazienteAttivo,
-            data: normalizzaDataImport(r.data)
-          };
-
-          const key = chiaveRecord(recordImport);
-          const esistente = mappa.get(key);
-
-          if (!esistente){
-            mappa.set(key, recordImport);
-          } else {
-            mappa.set(key, {
-              ...esistente,
-              paziente: recordImport.paziente || esistente.paziente,
-              data: recordImport.data || esistente.data,
-
-              glicemiaColazione: recordImport.glicemiaColazione !== '' ? recordImport.glicemiaColazione : esistente.glicemiaColazione,
-              insulinaColazione: recordImport.insulinaColazione !== '' ? recordImport.insulinaColazione : esistente.insulinaColazione,
-              glicemiaDopoColazione: recordImport.glicemiaDopoColazione !== '' ? recordImport.glicemiaDopoColazione : esistente.glicemiaDopoColazione,
-
-              glicemiaPranzo: recordImport.glicemiaPranzo !== '' ? recordImport.glicemiaPranzo : esistente.glicemiaPranzo,
-              insulinaPranzo: recordImport.insulinaPranzo !== '' ? recordImport.insulinaPranzo : esistente.insulinaPranzo,
-              glicemiaDopoPranzo: recordImport.glicemiaDopoPranzo !== '' ? recordImport.glicemiaDopoPranzo : esistente.glicemiaDopoPranzo,
-
-              glicemiaCena: recordImport.glicemiaCena !== '' ? recordImport.glicemiaCena : esistente.glicemiaCena,
-              insulinaCena: recordImport.insulinaCena !== '' ? recordImport.insulinaCena : esistente.insulinaCena,
-              glicemiaDopoCena: recordImport.glicemiaDopoCena !== '' ? recordImport.glicemiaDopoCena : esistente.glicemiaDopoCena,
-
-              insulinaNotte: recordImport.insulinaNotte !== '' ? recordImport.insulinaNotte : esistente.insulinaNotte,
-
-              doseConsigliataColazione: recordImport.doseConsigliataColazione !== '' ? recordImport.doseConsigliataColazione : esistente.doseConsigliataColazione,
-              doseConsigliataPranzo: recordImport.doseConsigliataPranzo !== '' ? recordImport.doseConsigliataPranzo : esistente.doseConsigliataPranzo,
-              doseConsigliataCena: recordImport.doseConsigliataCena !== '' ? recordImport.doseConsigliataCena : esistente.doseConsigliataCena,
-              doseConsigliataNotte: recordImport.doseConsigliataNotte !== '' ? recordImport.doseConsigliataNotte : esistente.doseConsigliataNotte,
-
-              ultimoAggiornamento: new Date().toISOString()
-            });
-          }
-        });
-
-        const finali = Array.from(mappa.values())
-          .sort((a,b) => String(b.data).localeCompare(String(a.data)));
-
-        setData(finali);
-        render();
-        caricaOPulisciPerData();
-        msg(`Unione completata: ${importatiNormalizzati.length} record elaborati.`);
-      }
-      else {
-        msg('Scelta non valida.', false);
-      }
-    } catch(err){
-      console.error(err);
-      msg('Errore nel file backup.', false);
     }
 
-    event.target.value = '';
-  };
+    let dati = getLocal();
 
-  reader.readAsText(file);
+    // ❌ NO DUPLICATI DATA
+    dati = dati.filter(r => !(r.data === record.data && r.paziente === record.paziente));
+
+    dati.push(record);
+    dati.sort((a,b)=>a.data.localeCompare(b.data));
+
+    setLocal(dati);
+    alert("Salvato");
+
+    aggiornaGrafico();
 }
 
-function downloadBlob(blob, filename){
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = filename;
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-  URL.revokeObjectURL(url);
+// ==========================
+// SYNC CLOUD
+// ==========================
+
+async function syncCloud() {
+
+    let dati = getLocal();
+
+    for (let r of dati) {
+        let id = r.paziente + "_" + r.data;
+
+        await db.collection("glicemia").doc(id).set(r);
+    }
+
+    // DOWNLOAD CLOUD
+    let snap = await db.collection("glicemia").get();
+
+    let cloud = [];
+    snap.forEach(doc => cloud.push(doc.data()));
+
+    mergeData(cloud);
+
+    alert("Sync completata");
 }
 
-function mediaNumerica(valori){
-  const nums = valori.map(v => Number(v)).filter(v => !Number.isNaN(v));
-  if (!nums.length) return '-';
-  return (nums.reduce((a,b) => a+b, 0) / nums.length).toFixed(1);
-}
+// ==========================
+// MERGE INTELLIGENTE
+// ==========================
 
-function sommaNumerica(valori){
-  const nums = valori.map(v => Number(v)).filter(v => !Number.isNaN(v));
-  if (!nums.length) return '-';
-  return nums.reduce((a,b) => a+b, 0).toFixed(1);
-}
+function mergeData(nuovi) {
 
-function aggiornaRiepilogo(dati){
-  const paziente = getPaziente().trim();
-  const filtrati = dati.filter(r => r.paziente === paziente);
+    let locali = getLocal();
 
-  const tutteGlicemie = [];
-  const tutteInsuline = [];
+    let map = {};
 
-  filtrati.forEach(r => {
-    [
-      r.glicemiaColazione,
-      r.glicemiaDopoColazione,
-      r.glicemiaPranzo,
-      r.glicemiaDopoPranzo,
-      r.glicemiaCena,
-      r.glicemiaDopoCena
-    ].forEach(v => tutteGlicemie.push(v));
+    [...locali, ...nuovi].forEach(r => {
 
-    [
-      r.insulinaColazione,
-      r.insulinaPranzo,
-      r.insulinaCena,
-      r.insulinaNotte
-    ].forEach(v => tutteInsuline.push(v));
-  });
+        let key = r.paziente + "_" + r.data;
 
-  document.getElementById('reportPaziente').textContent = paziente || '-';
-  document.getElementById('mediaG').textContent = mediaNumerica(tutteGlicemie);
-  document.getElementById('totaleI').textContent = sommaNumerica(tutteInsuline);
-  document.getElementById('numR').textContent = filtrati.length;
-}
-
-function aggiornaReportCompleto(){
-  const paziente = getPaziente().trim();
-  const dati = getData()
-    .filter(r => r.paziente === paziente)
-    .sort((a,b) => String(b.data).localeCompare(String(a.data)));
-
-  aggiornaRiepilogo(getData());
-
-  const tbody = document.getElementById('tbodyReport');
-  tbody.innerHTML = '';
-
-  if (!dati.length){
-    tbody.innerHTML = '<tr><td colspan="6" class="empty">Nessun dato disponibile.</td></tr>';
-    return;
-  }
-
-  dati.forEach(r => {
-    const insTot =
-      Number(r.insulinaColazione || 0) +
-      Number(r.insulinaPranzo || 0) +
-      Number(r.insulinaCena || 0) +
-      Number(r.insulinaNotte || 0);
-
-    tbody.innerHTML += `
-      <tr>
-        <td>${normalizzaDataImport(r.data) || '-'}</td>
-        <td>${r.glicemiaColazione || '-'}</td>
-        <td>${r.glicemiaPranzo || '-'}</td>
-        <td>${r.glicemiaCena || '-'}</td>
-        <td>${r.glicemiaDopoCena || '-'}</td>
-        <td>${insTot}</td>
-      </tr>
-    `;
-  });
-
-  renderTabellaDosi(getData());
-}
-
-function preparaDatiGrafico(giorni = 7){
-  const paziente = getPaziente().trim();
-  const dati = getData()
-    .filter(r => r.paziente === paziente)
-    .sort((a,b) => String(a.data).localeCompare(String(b.data)))
-    .slice(-giorni);
-
-  return {
-    labels: dati.map(r => normalizzaDataImport(r.data)),
-    valori: dati.map(r => r.glicemiaDopoCena || r.glicemiaCena || null)
-  };
-}
-
-function aggiornaGrafico(giorni = 7){
-  const canvas = document.getElementById('graficoGlicemia');
-  if (!canvas) return;
-
-  const dati = preparaDatiGrafico(giorni);
-
-  if (graficoGlicemia){
-    graficoGlicemia.destroy();
-  }
-
-  graficoGlicemia = new Chart(canvas, {
-    type: 'line',
-    data: {
-      labels: dati.labels,
-      datasets: [{
-        label: 'Glicemia',
-        data: dati.valori,
-        borderWidth: 3,
-        tension: 0.3,
-        spanGaps: true
-      }]
-    },
-    options: {
-      responsive: true,
-      scales: {
-        y: {
-          min: 0,
-          max: 320
+        if (!map[key]) {
+            map[key] = r;
+        } else {
+            // 🔥 MERGE CAMPI (NON SOVRASCRIVE SE ESISTE)
+            for (let k in r) {
+                if (map[key][k] == null && r[k] != null) {
+                    map[key][k] = r[k];
+                }
+            }
         }
-      }
-    }
-  });
+    });
+
+    let result = Object.values(map);
+    result.sort((a,b)=>a.data.localeCompare(b.data));
+
+    setLocal(result);
+    aggiornaGrafico();
 }
 
-function renderTabellaDosi(dati){
-  const paziente = getPaziente().trim();
-  const filtrati = dati.filter(r => r.paziente === paziente);
-  const tbody = document.getElementById('tbodyDosi');
-  tbody.innerHTML = '';
+// ==========================
+// IMPORT JSON
+// ==========================
 
-  if (!filtrati.length){
-    tbody.innerHTML = '<tr><td colspan="8" class="empty">Nessun dettaglio dose.</td></tr>';
-    return;
-  }
+function importJSON(event) {
 
-  filtrati.slice().sort((a,b) => String(b.data).localeCompare(String(a.data))).forEach(r => {
-    const tr = document.createElement('tr');
-    tr.innerHTML = `
-      <td>${r.paziente || '-'}</td>
-      <td>${normalizzaDataImport(r.data) || '-'}</td>
-      <td>${r.doseConsigliataColazione || '-'}</td>
-      <td>${r.doseConsigliataPranzo || '-'}</td>
-      <td>${r.doseConsigliataCena || '-'}</td>
-      <td>${r.doseConsigliataNotte || '-'}</td>
-      <td>${r.insulinaNotte || '-'}</td>
-      <td>
-        <button class="small-btn" style="background:#dbeafe;color:#1d4ed8;" onclick="caricaGiornata('${normalizzaDataImport(r.data)}','${r.paziente}')">Carica</button>
-        <button class="small-btn" style="background:#fee2e2;color:#991b1b;" onclick="eliminaGiornata('${r.paziente}','${normalizzaDataImport(r.data)}')">Elimina</button>
-      </td>
-    `;
-    tbody.appendChild(tr);
-  });
+    let file = event.target.files[0];
+    let reader = new FileReader();
+
+    reader.onload = function(e) {
+        let json = JSON.parse(e.target.result);
+        mergeData(json);
+        alert("Import OK");
+    };
+
+    reader.readAsText(file);
 }
 
-function renderSchema(){
-  const tbody = document.getElementById('tbodySchema');
-  const schema = getSchema();
-  tbody.innerHTML = '';
+// ==========================
+// GRAFICO
+// ==========================
 
-  schema.forEach((riga, index) => {
-    const tr = document.createElement('tr');
-    tr.innerHTML = `
-      <td><input class="schema-input" type="number" id="s_min_${index}" value="${riga.min ?? ''}"></td>
-      <td><input class="schema-input" type="number" id="s_max_${index}" value="${riga.max ?? ''}"></td>
-      <td><input class="schema-input" type="number" id="s_col_${index}" value="${riga.col ?? ''}"></td>
-      <td><input class="schema-input" type="number" id="s_pra_${index}" value="${riga.pra ?? ''}"></td>
-      <td><input class="schema-input" type="number" id="s_cen_${index}" value="${riga.cen ?? ''}"></td>
-      <td><input class="schema-input" type="number" id="s_not_${index}" value="${riga.not ?? ''}"></td>
-      <td><button class="small-btn" style="background:#fee2e2;color:#991b1b;" onclick="eliminaRigaSchema(${index})">Elimina</button></td>
-    `;
-    tbody.appendChild(tr);
-  });
+let chart;
+
+function aggiornaGrafico() {
+
+    let dati = getLocal();
+
+    let labels = dati.map(d => d.data);
+    let valori = dati.map(d => d.glicemiaColazione || null);
+
+    if (chart) chart.destroy();
+
+    chart = new Chart(document.getElementById("grafico"), {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Glicemia Colazione',
+                data: valori
+            }]
+        }
+    });
 }
 
-function aggiungiRigaSchema(){
-  const schema = getSchema();
-  schema.push({ min:'', max:'', col:'', pra:'', cen:'', not:'' });
-  setSchema(schema);
-  renderSchema();
+aggiornaGrafico();
+
+// ==========================
+// PDF
+// ==========================
+
+function exportPDF() {
+
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+
+    let dati = getLocal();
+
+    let y = 10;
+
+    dati.forEach(d => {
+        doc.text(`${d.data} - ${d.glicemiaColazione || ""}`, 10, y);
+        y += 6;
+    });
+
+    doc.save("report_glicemia.pdf");
 }
 
-function eliminaRigaSchema(index){
-  const schema = getSchema();
-  schema.splice(index, 1);
-  setSchema(schema);
-  renderSchema();
-}
-
-function salvaSchema(){
-  const schemaAttuale = getSchema();
-  const nuovoSchema = [];
-
-  for(let i = 0; i < schemaAttuale.length; i++){
-    const min = Number(document.getElementById(`s_min_${i}`).value);
-    const max = Number(document.getElementById(`s_max_${i}`).value);
-    const col = Number(document.getElementById(`s_col_${i}`).value);
-    const pra = Number(document.getElementById(`s_pra_${i}`).value);
-    const cen = Number(document.getElementById(`s_cen_${i}`).value);
-    const not = Number(document.getElementById(`s_not_${i}`).value);
-
-    if (
-      Number.isNaN(min) ||
-      Number.isNaN(max) ||
-      Number.isNaN(col) ||
-      Number.isNaN(pra) ||
-      Number.isNaN(cen) ||
-      Number.isNaN(not)
-    ){
-      msg('Controlla lo schema: ci sono campi vuoti o non validi.', false);
-      return;
-    }
-
-    nuovoSchema.push({ min, max, col, pra, cen, not });
-  }
-
-  nuovoSchema.sort((a,b) => a.min - b.min);
-  setSchema(nuovoSchema);
-
-  const paziente = getPaziente().trim();
-  if (paziente && window.cloudApi){
-    window.cloudApi.salvaSchemaPaziente(paziente, nuovoSchema)
-      .catch(err => console.error('Errore salvataggio schema cloud:', err));
-  }
-
-  renderSchema();
-  aggiornaTutteLeDosi();
-  msg('Schema terapia salvato.');
-}
-
-function ripristinaSchemaDefault(){
-  const conferma = confirm('Vuoi ripristinare lo schema base?');
-  if (!conferma) return;
-  setSchema(SCHEMA_DEFAULT);
-  renderSchema();
-  aggiornaTutteLeDosi();
-  msg('Schema terapia base ripristinato.');
-}
-
-function esportaPDF(){
-  const paziente = getPaziente().trim();
-  const dati = getData()
-    .filter(r => r.paziente === paziente)
-    .sort((a,b) => String(a.data).localeCompare(String(b.data)));
-
-  if (!dati.length){
-    msg('Nessun dato da esportare in PDF.', false);
-    return;
-  }
-
-  const { jsPDF } = window.jspdf;
-  const doc = new jsPDF();
-
-  doc.setFontSize(16);
-  doc.text(`Storico Glicemia - ${paziente}`, 14, 15);
-
-  doc.setFontSize(10);
-  doc.text(`Generato il ${new Date().toLocaleString('it-IT')}`, 14, 22);
-
-  const rows = dati.map(r => [
-    normalizzaDataImport(r.data),
-    r.glicemiaColazione ?? '',
-    r.insulinaColazione ?? '',
-    r.glicemiaPranzo ?? '',
-    r.insulinaPranzo ?? '',
-    r.glicemiaCena ?? '',
-    r.insulinaCena ?? '',
-    r.glicemiaDopoCena ?? '',
-    r.insulinaNotte ?? ''
-  ]);
-
-  doc.autoTable({
-    startY: 28,
-    head: [[
-      'Data',
-      'Glic. Col.',
-      'Ins. Col.',
-      'Glic. Pra.',
-      'Ins. Pra.',
-      'Glic. Cena',
-      'Ins. Cena',
-      'Dopo Cena',
-      'Ins. Notte'
-    ]],
-    body: rows,
-    styles: { fontSize: 8 }
-  });
-
-  doc.save(`${paziente.replace(/\s+/g, '_')}_storico_glicemia.pdf`);
-  msg('PDF esportato.');
-}
-
-function esportaDaReport(){
-  const scelta = prompt(
-`Esporta dati
-
-1 = CSV
-2 = PDF
-3 = Backup
-
-Inserisci 1, 2 oppure 3`
-  );
-
-  if (scelta === '1'){
-    esportaCSV();
-  } else if (scelta === '2'){
-    esportaPDF();
-  } else if (scelta === '3'){
-    creaBackupJSON();
-  } else if (scelta !== null){
-    msg('Scelta non valida.', false);
-  }
-}
-
-function render(){
-  aggiornaReportCompleto();
-}
-
-document.getElementById('g_col').addEventListener('input', function(){
-  aggiornaDoseElemento('g_col', 'dose_col', 'col');
-  mostraAlertRange('g_col', 'warn_g_col');
-});
-document.getElementById('g_pra').addEventListener('input', function(){
-  aggiornaDoseElemento('g_pra', 'dose_pra', 'pra');
-  mostraAlertRange('g_pra', 'warn_g_pra');
-});
-document.getElementById('g_cen').addEventListener('input', function(){
-  aggiornaDoseElemento('g_cen', 'dose_cen', 'cen');
-  mostraAlertRange('g_cen', 'warn_g_cen');
-});
-document.getElementById('g_cen_post').addEventListener('input', function(){
-  const doseNotte = calcolaInsulina(this.value, 'not');
-  document.getElementById('dose_not').innerText = doseNotte
-    ? `💉 Dose consigliata: ${doseNotte} U`
-    : '💉 Dose consigliata: -';
-  mostraAlertRange('g_cen_post', 'warn_g_cen_post');
-});
-
-document.getElementById('schemaBackdrop').addEventListener('click', function(e){
-  if (e.target === this) chiudiSchema();
-});
-document.getElementById('impostazioniBackdrop').addEventListener('click', function(e){
-  if (e.target === this) chiudiImpostazioni();
-});
-document.getElementById('data').addEventListener('change', caricaOPulisciPerData);
-
-window.addEventListener('online', () => {
-  aggiornaStatoConnessione();
-  aggiornaStatoSync('☁️ Online - sync attiva');
-});
-window.addEventListener('offline', () => {
-  aggiornaStatoConnessione();
-  aggiornaStatoSync('📴 Offline - uso locale');
-});
-
-if (!getPaziente()){
-  apriImpostazioni();
-}
-
-document.getElementById('data').value = oggi();
-aggiornaPazienteUI();
-aggiornaStatoConnessione();
-aggiornaStatoSync('☁️ Sync pronta');
-caricaOPulisciPerData();
-aggiornaTutteLeDosi();
-render();
-syncSilenziosaIniziale = true;
-syncLocaleDaCloudRealtime();
-syncSchemaPazienteDaCloud();
 </script>
 
-<script>
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('./sw.js')
-      .then(() => console.log('Service Worker registrato'))
-      .catch(err => console.log('Errore Service Worker:', err));
-  });
-}
-</script>
 </body>
 </html>
