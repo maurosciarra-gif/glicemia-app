@@ -554,7 +554,8 @@
       <button class="btn btn-primary" onclick="salvaPaziente()">Salva profilo</button>
       <button class="btn btn-soft" onclick="apriSchema()">Schema Terapia</button>
       <button class="btn btn-soft" onclick="creaBackupJSON()">Backup</button>
-      <button class="btn btn-soft" onclick="document.getElementById('fileRipristino').click()">Ripristina backup</button>
+      <button class="btn btn-soft" onclick="document.getElementById('fileRipristino').click()">Ripristina da file</button>
+      <button class="btn btn-soft" onclick="forzaSyncCloud()">Sincronizza dal cloud</button>
       <button class="btn btn-danger" onclick="svuotaTuttoConferma()">Svuota tutto</button>
     </div>
 
@@ -576,7 +577,8 @@
     getDoc,
     query,
     where,
-    onSnapshot
+    onSnapshot,
+    getDocs
   } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
   const firebaseConfig = {
@@ -609,6 +611,15 @@
     async eliminaGiornata(paziente, data) {
       const id = makeDocId(paziente, data);
       await deleteDoc(doc(db, "glicemia_records", id));
+    },
+
+    async caricaGiornatePaziente(paziente){
+      const q = query(
+        collection(db, "glicemia_records"),
+        where("paziente", "==", paziente)
+      );
+      const snap = await getDocs(q);
+      return snap.docs.map(d => d.data());
     },
 
     ascoltaGiornateRealtime(paziente, callback) {
@@ -671,7 +682,7 @@ const medicalBandsPlugin = {
     const { ctx, chartArea, scales } = chart;
     if (!chartArea || !scales?.y) return;
 
-    const { left, right, top, bottom } = chartArea;
+    const { left, right } = chartArea;
     const y = scales.y;
 
     const drawBand = (from, to, color) => {
@@ -844,9 +855,7 @@ function mostraAlertRange(inputId, warnId){
   const val = Number(document.getElementById(inputId).value);
   const el = document.getElementById(warnId);
 
-  if (!el){
-    return;
-  }
+  if (!el) return;
 
   if (Number.isNaN(val) || document.getElementById(inputId).value === ''){
     el.style.display = 'none';
@@ -925,6 +934,49 @@ function syncLocaleDaCloudRealtime(){
   } catch(err){
     console.error('Errore realtime cloud:', err);
     msg('Cloud realtime non disponibile.', false);
+  }
+}
+
+async function forzaSyncCloud(){
+  try{
+    const paziente = getPaziente().trim();
+    if (!paziente){
+      msg('Prima salva il nome paziente.', false);
+      return;
+    }
+
+    if (!window.cloudApi){
+      msg('Cloud non disponibile.', false);
+      return;
+    }
+
+    msg('Sincronizzazione in corso...');
+
+    const datiCloud = await window.cloudApi.caricaGiornatePaziente(paziente);
+
+    if (!datiCloud.length){
+      msg('Nessun dato trovato nel cloud.', false);
+      return;
+    }
+
+    const conferma = confirm(
+`Sono stati trovati ${datiCloud.length} record nel cloud.
+
+Vuoi sostituire i dati locali del paziente attivo?`
+    );
+
+    if (!conferma) return;
+
+    const altri = getData().filter(r => r.paziente !== paziente);
+
+    setData([...datiCloud, ...altri].sort((a,b) => b.data.localeCompare(a.data)));
+    render();
+    caricaOPulisciPerData();
+
+    msg('Sincronizzazione cloud completata.');
+  } catch(err){
+    console.error(err);
+    msg('Errore durante sincronizzazione cloud.', false);
   }
 }
 
