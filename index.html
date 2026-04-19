@@ -6,7 +6,8 @@
   <title>Glicemia App PRO</title>
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#3b82f6">
-    <style>
+  <link rel="apple-touch-icon" href="icon-192.png">
+  <style>
     :root{
       --bg:#efefef;
       --blue:#3b82f6;
@@ -502,6 +503,52 @@
     </div>
   </div>
 
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import {
+      getFirestore,
+      collection,
+      getDocs,
+      setDoc,
+      doc,
+      deleteDoc
+    } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyD4qS60jZ9x8ySuDy2HpgI-m4HLbxFBFNQ",
+      authDomain: "glicemia-app-b1611.firebaseapp.com",
+      projectId: "glicemia-app-b1611",
+      storageBucket: "glicemia-app-b1611.firebasestorage.app",
+      messagingSenderId: "892768422000",
+      appId: "1:892768422000:web:da09449b0803639c4c4cb5",
+      measurementId: "G-VZ7B26DXGV"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    function makeDocId(utente, data) {
+      return `${utente}__${data}`.replace(/[^\w\-]/g, "_");
+    }
+
+    window.cloudApi = {
+      async salvaGiornata(record) {
+        const id = makeDocId(record.utente, record.data);
+        await setDoc(doc(db, "glicemia_records", id), record);
+      },
+
+      async eliminaGiornata(utente, data) {
+        const id = makeDocId(utente, data);
+        await deleteDoc(doc(db, "glicemia_records", id));
+      },
+
+      async caricaTutteLeGiornate() {
+        const snap = await getDocs(collection(db, "glicemia_records"));
+        return snap.docs.map(d => d.data());
+      }
+    };
+  </script>
+
 <script>
 const KEY = 'glicemia_diario_utente_v2';
 const KEY_SCHEMA = 'glicemia_schema_dottoressa_v9';
@@ -511,12 +558,12 @@ let salvataggioInCorso = false;
 let modificaSbloccata = false;
 
 const SCHEMA_DEFAULT = [
-  { min: 80,  max: 120, col: 5,  pra: 6,  cen: 5,  not: 5 },
-  { min: 120, max: 160, col: 6,  pra: 7,  cen: 6,  not: 6 },
-  { min: 160, max: 200, col: 7,  pra: 8,  cen: 7,  not: 7 },
-  { min: 200, max: 240, col: 8,  pra: 9,  cen: 8,  not: 8 },
-  { min: 240, max: 280, col: 9,  pra: 10, cen: 9,  not: 9 },
-  { min: 280, max: 320, col: 10, pra: 11, cen: 10, not: 10 }
+  { min: 80,  max: 120, col: 3,  pra: 4,  cen: 3,  not: 10 },
+  { min: 120, max: 160, col: 4,  pra: 5,  cen: 4,  not: 10 },
+  { min: 160, max: 200, col: 5,  pra: 6,  cen: 5,  not: 10 },
+  { min: 200, max: 240, col: 5,  pra: 6,  cen: 6,  not: 10 },
+  { min: 240, max: 280, col: 6,  pra: 7,  cen: 7,  not: 10 },
+  { min: 280, max: 320, col: 7,  pra: 8,  cen: 8,  not: 10 }
 ];
 
 function oggi(){
@@ -610,6 +657,54 @@ function msg(t, ok=true){
   setTimeout(() => {
     if (el.textContent === t) el.textContent = '';
   }, 2600);
+}
+
+async function syncLocaleDaCloud(){
+  try{
+    if (!window.cloudApi) return;
+
+    const datiCloud = await window.cloudApi.caricaTutteLeGiornate();
+    if (!Array.isArray(datiCloud)) return;
+
+    let locali = getData();
+
+    datiCloud.forEach(nuovo => {
+      const idx = locali.findIndex(r => r.utente === nuovo.utente && r.data === nuovo.data);
+      if (idx === -1){
+        locali.push(nuovo);
+      } else {
+        locali[idx] = nuovo;
+      }
+    });
+
+    setData(locali.sort((a,b) => b.data.localeCompare(a.data)));
+    render();
+    caricaOPulisciPerData();
+    msg('Dati cloud sincronizzati.');
+  } catch(err){
+    console.error('Errore sync cloud:', err);
+    msg('Cloud non raggiungibile.', false);
+  }
+}
+
+async function salvaGiornataSuCloud(record){
+  try{
+    if (!window.cloudApi) return;
+    await window.cloudApi.salvaGiornata(record);
+  } catch(err){
+    console.error('Errore salvataggio cloud:', err);
+    msg('Salvato in locale, ma errore cloud.', false);
+  }
+}
+
+async function eliminaGiornataDaCloud(utente, data){
+  try{
+    if (!window.cloudApi) return;
+    await window.cloudApi.eliminaGiornata(utente, data);
+  } catch(err){
+    console.error('Errore eliminazione cloud:', err);
+    msg('Eliminata in locale, ma errore cloud.', false);
+  }
 }
 
 function setCampiBloccatiPerRecord(record, forzaSblocco = false){
@@ -817,6 +912,7 @@ function salvaGiornata(){
     if (idx === -1){
       const nuovo = { ...record };
       setData([nuovo, ...dati].sort((a,b) => b.data.localeCompare(a.data)));
+      salvaGiornataSuCloud(nuovo);
       modificaSbloccata = false;
       setCampiBloccatiPerRecord(nuovo, false);
       msg('Nuova giornata salvata.');
@@ -891,6 +987,7 @@ function salvaGiornata(){
 
     dati[idx] = aggiornato;
     setData(dati.sort((a,b) => b.data.localeCompare(a.data)));
+    salvaGiornataSuCloud(aggiornato);
 
     modificaSbloccata = false;
     setCampiBloccatiPerRecord(aggiornato, false);
@@ -908,6 +1005,7 @@ function eliminaGiornata(utente, data){
   if (!conferma) return;
 
   setData(getData().filter(r => !(r.data === data && r.utente === utente)));
+  eliminaGiornataDaCloud(utente, data);
   render();
 
   if (document.getElementById('data').value === data && getUtente() === utente){
@@ -1361,7 +1459,9 @@ aggiornaUtenteUI();
 caricaOPulisciPerData();
 aggiornaTutteLeDosi();
 render();
+syncLocaleDaCloud();
 </script>
+
 <script>
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
