@@ -6,44 +6,22 @@
 
 <title>Glicemia PRO</title>
 
+<!-- Chart -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<!-- PDF -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
-<!-- Firebase -->
-<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js"></script>
+<!-- Firebase COMPAT (IMPORTANTE) -->
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
 
 <style>
-body {
-    font-family: Arial;
-    background: #f4f4f4;
-    padding: 10px;
-}
-
-.card {
-    background: white;
-    padding: 12px;
-    margin: 10px 0;
-    border-radius: 10px;
-}
-
-input {
-    width: 100%;
-    padding: 8px;
-    margin: 4px 0;
-}
-
-button {
-    padding: 10px;
-    margin: 5px 0;
-    width: 100%;
-    border: none;
-    border-radius: 8px;
-    background: #007bff;
-    color: white;
-}
-
-h2 { text-align: center; }
+body { font-family: Arial; background:#f4f4f4; padding:10px; }
+.card { background:white; padding:12px; margin:10px 0; border-radius:10px; }
+input { width:100%; padding:8px; margin:4px 0; }
+button { padding:10px; margin:5px 0; width:100%; border:none; border-radius:8px; background:#007bff; color:white; }
+h2 { text-align:center; }
 </style>
 </head>
 
@@ -52,21 +30,26 @@ h2 { text-align: center; }
 <h2>Glicemia PRO</h2>
 
 <div class="card">
-<input id="paziente" placeholder="Nome Paziente">
+
+<input id="paziente" placeholder="Paziente">
 <input type="date" id="data">
 
-<input id="glicemiaColazione" placeholder="Glicemia Colazione">
-<input id="insulinaColazione" placeholder="Insulina Colazione">
-<input id="glicemiaDopoColazione" placeholder="Dopo Colazione">
+<h4>COLAZIONE</h4>
+<input id="glicemiaColazione" placeholder="Glicemia">
+<input id="insulinaColazione" placeholder="Insulina">
+<input id="glicemiaDopoColazione" placeholder="Dopo">
 
-<input id="glicemiaPranzo" placeholder="Glicemia Pranzo">
-<input id="insulinaPranzo" placeholder="Insulina Pranzo">
-<input id="glicemiaDopoPranzo" placeholder="Dopo Pranzo">
+<h4>PRANZO</h4>
+<input id="glicemiaPranzo" placeholder="Glicemia">
+<input id="insulinaPranzo" placeholder="Insulina">
+<input id="glicemiaDopoPranzo" placeholder="Dopo">
 
-<input id="glicemiaCena" placeholder="Glicemia Cena">
-<input id="insulinaCena" placeholder="Insulina Cena">
-<input id="glicemiaDopoCena" placeholder="Dopo Cena">
+<h4>CENA</h4>
+<input id="glicemiaCena" placeholder="Glicemia">
+<input id="insulinaCena" placeholder="Insulina">
+<input id="glicemiaDopoCena" placeholder="Dopo">
 
+<h4>NOTTE</h4>
 <input id="insulinaNotte" placeholder="Insulina Notte">
 
 <button onclick="salva()">SALVA</button>
@@ -74,11 +57,12 @@ h2 { text-align: center; }
 <button onclick="exportPDF()">EXPORT PDF</button>
 
 <input type="file" onchange="importJSON(event)">
+
 </div>
 
 <canvas id="grafico"></canvas>
 
-<script type="module">
+<script>
 
 // 🔥 CONFIG FIREBASE (INSERISCI I TUOI DATI)
 const firebaseConfig = {
@@ -87,7 +71,7 @@ const firebaseConfig = {
     projectId: "TUO_PROJECT_ID"
 };
 
-const app = firebase.initializeApp(firebaseConfig);
+firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 
 // ==========================
@@ -102,8 +86,17 @@ function setLocal(data) {
     localStorage.setItem("glicemia", JSON.stringify(data));
 }
 
+// TERAPIA
+function getSchema() {
+    return JSON.parse(localStorage.getItem("schema") || "{}");
+}
+
+function setSchema(s) {
+    localStorage.setItem("schema", JSON.stringify(s));
+}
+
 // ==========================
-// SALVATAGGIO
+// UTIL
 // ==========================
 
 function getVal(id) {
@@ -111,9 +104,13 @@ function getVal(id) {
     return v === "" ? null : v;
 }
 
+// ==========================
+// SALVA
+// ==========================
+
 function salva() {
 
-    let record = {
+    let r = {
         paziente: getVal("paziente"),
         data: getVal("data"),
 
@@ -132,23 +129,23 @@ function salva() {
         insulinaNotte: getVal("insulinaNotte")
     };
 
-    if (!record.data) {
-        alert("Inserisci data");
+    if (!r.data || !r.paziente) {
+        alert("Inserisci paziente e data");
         return;
     }
 
     let dati = getLocal();
 
-    // ❌ NO DUPLICATI DATA
-    dati = dati.filter(r => !(r.data === record.data && r.paziente === record.paziente));
+    // NO DUPLICATI
+    dati = dati.filter(x => !(x.data === r.data && x.paziente === r.paziente));
 
-    dati.push(record);
+    dati.push(r);
     dati.sort((a,b)=>a.data.localeCompare(b.data));
 
     setLocal(dati);
-    alert("Salvato");
 
     aggiornaGrafico();
+    alert("Salvato");
 }
 
 // ==========================
@@ -159,31 +156,51 @@ async function syncCloud() {
 
     let dati = getLocal();
 
+    // UPLOAD GLICEMIA
     for (let r of dati) {
         let id = r.paziente + "_" + r.data;
-
         await db.collection("glicemia").doc(id).set(r);
     }
 
-    // DOWNLOAD CLOUD
+    // DOWNLOAD GLICEMIA
     let snap = await db.collection("glicemia").get();
-
     let cloud = [];
     snap.forEach(doc => cloud.push(doc.data()));
 
     mergeData(cloud);
 
+    // 🔥 TERAPIA
+
+    let schema = getSchema();
+
+    // upload schema
+    for (let p in schema) {
+        await db.collection("glicemia_schemi").doc(p).set(schema[p]);
+    }
+
+    // download schema
+    let snapS = await db.collection("glicemia_schemi").get();
+    let schemaCloud = {};
+    snapS.forEach(doc => schemaCloud[doc.id] = doc.data());
+
+    let locale = getSchema();
+
+    for (let p in schemaCloud) {
+        locale[p] = { ...locale[p], ...schemaCloud[p] };
+    }
+
+    setSchema(locale);
+
     alert("Sync completata");
 }
 
 // ==========================
-// MERGE INTELLIGENTE
+// MERGE DATI
 // ==========================
 
 function mergeData(nuovi) {
 
     let locali = getLocal();
-
     let map = {};
 
     [...locali, ...nuovi].forEach(r => {
@@ -193,7 +210,6 @@ function mergeData(nuovi) {
         if (!map[key]) {
             map[key] = r;
         } else {
-            // 🔥 MERGE CAMPI (NON SOVRASCRIVE SE ESISTE)
             for (let k in r) {
                 if (map[key][k] == null && r[k] != null) {
                     map[key][k] = r[k];
@@ -213,13 +229,13 @@ function mergeData(nuovi) {
 // IMPORT JSON
 // ==========================
 
-function importJSON(event) {
+function importJSON(e) {
 
-    let file = event.target.files[0];
+    let file = e.target.files[0];
     let reader = new FileReader();
 
-    reader.onload = function(e) {
-        let json = JSON.parse(e.target.result);
+    reader.onload = function(evt) {
+        let json = JSON.parse(evt.target.result);
         mergeData(json);
         alert("Import OK");
     };
@@ -266,7 +282,6 @@ function exportPDF() {
     const doc = new jsPDF();
 
     let dati = getLocal();
-
     let y = 10;
 
     dati.forEach(d => {
@@ -274,7 +289,7 @@ function exportPDF() {
         y += 6;
     });
 
-    doc.save("report_glicemia.pdf");
+    doc.save("report.pdf");
 }
 
 </script>
