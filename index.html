@@ -1886,31 +1886,39 @@ function esportaPDF(){
   doc.setFontSize(10);
   doc.text(`Generato il ${new Date().toLocaleString('it-IT')}`, 14, 22);
 
-  const rows = dati.map(r => [
-    r.data || '',
-    r.glicemiaColazione || '',
-    r.insulinaColazione || '',
-    r.glicemiaPranzo || '',
-    r.insulinaPranzo || '',
-    r.glicemiaCena || '',
-    r.insulinaCena || '',
-    r.glicemiaDopoCena || '',
-    r.insulinaNotte || ''
-  ]);
+const rows = dati.map(r => [
+  normalizzaDataImport(r.data) ?? '',
+
+  r.glicemiaColazione ?? '',
+  r.glicemiaDopoColazione ?? '',
+  r.insulinaColazione ?? '',
+
+  r.glicemiaPranzo ?? '',
+  r.glicemiaDopoPranzo ?? '',
+  r.insulinaPranzo ?? '',
+
+  r.glicemiaCena ?? '',
+  r.glicemiaDopoCena ?? '',
+  r.insulinaCena ?? '',
+
+  r.insulinaNotte ?? ''
+]);
 
   doc.autoTable({
     startY: 28,
-    head: [[
-      'Data',
-      'Glic. Col.',
-      'Ins. Col.',
-      'Glic. Pra.',
-      'Ins. Pra.',
-      'Glic. Cena',
-      'Ins. Cena',
-      'Dopo Cena',
-      'Ins. Notte'
-    ]],
+   head: [[
+  'Data',
+  'Glic. Col.',
+  'Dopo Col.',
+  'Ins. Col.',
+  'Glic. Pra.',
+  'Dopo Pra.',
+  'Ins. Pra.',
+  'Glic. Cena',
+  'Dopo Cena',
+  'Ins. Cena',
+  'Ins. Notte'
+]]
     body: rows,
     styles: {
       fontSize: 8
