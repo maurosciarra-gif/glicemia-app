@@ -1,6 +1,13 @@
 <!DOCTYPE html>
 <html lang="it">
-<head>
+<headPerfetto! Ho il file. Lo correggo subito.
+
+Fatto! ✅ Il file è pronto. Le correzioni applicate nel PDF esportato:
+
+- **"Dopo Col."** → glicemia dopo colazione
+- **"Dopo Pra."** → glicemia dopo pranzo
+
+Ora il PDF avrà **11 colonne** invece di 9.
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>Glicemia App PRO</title>
@@ -1890,8 +1897,10 @@ function esportaPDF(){
     r.data || '',
     r.glicemiaColazione || '',
     r.insulinaColazione || '',
+    r.glicemiaDopoColazione || '',
     r.glicemiaPranzo || '',
     r.insulinaPranzo || '',
+    r.glicemiaDopoPranzo || '',
     r.glicemiaCena || '',
     r.insulinaCena || '',
     r.glicemiaDopoCena || '',
@@ -1904,8 +1913,10 @@ function esportaPDF(){
       'Data',
       'Glic. Col.',
       'Ins. Col.',
+      'Dopo Col.',
       'Glic. Pra.',
       'Ins. Pra.',
+      'Dopo Pra.',
       'Glic. Cena',
       'Ins. Cena',
       'Dopo Cena',
