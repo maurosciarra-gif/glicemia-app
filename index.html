@@ -2000,16 +2000,43 @@ if (!getPaziente()){
   apriImpostazioni();
 }
 
-document.getElementById('data').value = oggi();
-aggiornaPazienteUI();
-aggiornaStatoConnessione();
-aggiornaStatoSync('☁️ Sync pronta');
-caricaOPulisciPerData();
-aggiornaTutteLeDosi();
-render();
-syncSilenziosaIniziale = true;
-syncLocaleDaCloudRealtime();
-syncSchemaPazienteDaCloud();
+window.addEventListener("load", () => {
+
+  console.log("APP AVVIATA");
+
+  aggiornaPazienteUI();
+  aggiornaStatoConnessione();
+  aggiornaStatoSync('☁️ Avvio app...');
+
+  document.getElementById('data').value = oggi();
+
+  caricaOPulisciPerData();
+  aggiornaTutteLeDosi();
+  render();
+
+  const paziente = getPaziente();
+
+  if (!paziente){
+    aggiornaStatoSync('⚠️ Nessun paziente');
+    return;
+  }
+
+  function startSync(){
+    console.log("SYNC AVVIATO");
+    syncSilenziosaIniziale = true;
+    syncSchemaPazienteDaCloud();
+    syncLocaleDaCloudRealtime();
+  }
+
+  // 🔥 attesa Firebase sicura
+  if (window.cloudApi){
+    startSync();
+  } else {
+    console.log("Attendo Firebase...");
+    window.addEventListener('firebaseReady', startSync, { once: true });
+  }
+
+});
 </script>
 
 <script>
