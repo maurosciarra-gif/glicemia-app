@@ -1,13 +1,6 @@
  <!DOCTYPE html>
 <html lang="it">
-<headPerfetto! Ho il file. Lo correggo subito.
-
-Fatto! ✅ Il file è pronto. Le correzioni applicate nel PDF esportato:
-
-- **"Dopo Col."** → glicemia dopo colazione
-- **"Dopo Pra."** → glicemia dopo pranzo
-
-Ora il PDF avrà **11 colonne** invece di 9.
+<head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>Glicemia App PRO</title>
@@ -476,7 +469,9 @@ Ora il PDF avrà **11 colonne** invece di 9.
             <tr>
               <th>Data</th>
               <th>Colazione</th>
+              <th>Dopo col.</th>
               <th>Pranzo</th>
+              <th>Dopo pra.</th>
               <th>Cena</th>
               <th>Dopo cena</th>
               <th>Insulina totale</th>
@@ -496,7 +491,9 @@ Ora il PDF avrà **11 colonne** invece di 9.
               <th>Paziente</th>
               <th>Data</th>
               <th>Dose colazione</th>
+              <th>Dopo col.</th>
               <th>Dose pranzo</th>
+              <th>Dopo pra.</th>
               <th>Dose cena</th>
               <th>Dose notte</th>
               <th>Insulina notte</th>
@@ -980,7 +977,7 @@ async function forzaSyncCloud(){
 
     msg('Sincronizzazione in corso...');
 
-    const datiCloud = await window.cloudApi.caricaTutteLeGiornatePaziente(paziente);
+    const datiCloud = await window.cloudApi.caricaGiornatePaziente(paziente);
 
     if (!Array.isArray(datiCloud) || datiCloud.length === 0){
       msg('Nessun dato trovato nel cloud.', false);
@@ -1686,7 +1683,7 @@ function aggiornaReportCompleto(){
   tbody.innerHTML = '';
 
   if (!dati.length){
-    tbody.innerHTML = '<tr><td colspan="6" class="empty">Nessun dato disponibile.</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="8" class="empty">Nessun dato disponibile.</td></tr>';
     return;
   }
 
@@ -1701,7 +1698,9 @@ function aggiornaReportCompleto(){
       <tr>
         <td>${r.data || '-'}</td>
         <td>${r.glicemiaColazione || '-'}</td>
+        <td>${r.glicemiaDopoColazione || '-'}</td>
         <td>${r.glicemiaPranzo || '-'}</td>
+        <td>${r.glicemiaDopoPranzo || '-'}</td>
         <td>${r.glicemiaCena || '-'}</td>
         <td>${r.glicemiaDopoCena || '-'}</td>
         <td>${insTot}</td>
@@ -1766,7 +1765,7 @@ function renderTabellaDosi(dati){
   tbody.innerHTML = '';
 
   if (!filtrati.length){
-    tbody.innerHTML = '<tr><td colspan="8" class="empty">Nessun dettaglio dose.</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="10" class="empty">Nessun dettaglio dose.</td></tr>';
     return;
   }
 
@@ -1776,7 +1775,9 @@ function renderTabellaDosi(dati){
       <td>${r.paziente || '-'}</td>
       <td>${r.data || '-'}</td>
       <td>${r.doseConsigliataColazione || '-'}</td>
+      <td>${r.glicemiaDopoColazione || '-'}</td>
       <td>${r.doseConsigliataPranzo || '-'}</td>
+      <td>${r.glicemiaDopoPranzo || '-'}</td>
       <td>${r.doseConsigliataCena || '-'}</td>
       <td>${r.doseConsigliataNotte || '-'}</td>
       <td>${r.insulinaNotte || '-'}</td>
@@ -2007,8 +2008,10 @@ caricaOPulisciPerData();
 aggiornaTutteLeDosi();
 render();
 syncSilenziosaIniziale = true;
-syncLocaleDaCloudRealtime();
-syncSchemaPazienteDaCloud();
+if (getPaziente().trim()) {
+  syncLocaleDaCloudRealtime();
+  syncSchemaPazienteDaCloud();
+}
 </script>
 
 <script>
@@ -2022,4 +2025,3 @@ if ('serviceWorker' in navigator) {
 </script>
 </body>
 </html>
-
