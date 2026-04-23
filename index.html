@@ -650,10 +650,6 @@
       return snap.data();
     }
   };
-
-  // Segnala che Firebase è pronto
-  window.firebaseReady = true;
-  window.dispatchEvent(new Event('firebaseReady'));
 </script>
 
 <script>
@@ -891,11 +887,7 @@ function mostraAlertRange(inputId, warnId){
 async function syncSchemaPazienteDaCloud(){
   try{
     const paziente = getPaziente().trim();
-    if (!paziente) return;
-    if (!window.cloudApi) {
-      window.addEventListener('firebaseReady', () => syncSchemaPazienteDaCloud(), { once: true });
-      return;
-    }
+    if (!paziente || !window.cloudApi) return;
 
     const dati = await window.cloudApi.caricaSchemaPaziente(paziente);
     if (dati && Array.isArray(dati.schema) && dati.schema.length){
@@ -910,11 +902,7 @@ async function syncSchemaPazienteDaCloud(){
 function syncLocaleDaCloudRealtime(){
   try{
     const paziente = getPaziente().trim();
-    if (!paziente) return;
-    if (!window.cloudApi) {
-      window.addEventListener('firebaseReady', () => syncLocaleDaCloudRealtime(), { once: true });
-      return;
-    }
+    if (!window.cloudApi || !paziente) return;
 
     if (stopCloudRealtime){
       stopCloudRealtime();
@@ -970,38 +958,41 @@ function syncLocaleDaCloudRealtime(){
 }
 
 async function forzaSyncCloud(){
+  const paziente = getPaziente().trim();
+
+  if (!paziente){
+    alert('Prima salva il nome paziente.');
+    return;
+  }
+
+  if (!window.cloudApi){
+    alert('❌ Firebase non ancora pronto. Attendi qualche secondo e riprova.');
+    return;
+  }
+
+  aggiornaStatoSync('☁️ Sincronizzazione in corso...');
+
   try{
-    const paziente = getPaziente().trim();
-
-    if (!paziente){
-      msg('Prima salva il nome paziente.', false);
-      return;
-    }
-
-    if (!window.cloudApi){
-      msg('Cloud non disponibile.', false);
-      return;
-    }
-
-    msg('Sincronizzazione in corso...');
-
-    const datiCloud = await window.cloudApi.caricaTutteLeGiornatePaziente(paziente);
+    const datiCloud = await window.cloudApi.caricaGiornatePaziente(paziente);
 
     if (!Array.isArray(datiCloud) || datiCloud.length === 0){
-      msg('Nessun dato trovato nel cloud.', false);
+      alert(`⚠️ Nessun dato trovato nel cloud per il paziente:\n"${paziente}"\n\nControlla che il nome sia scritto uguale su entrambi i telefoni.`);
+      aggiornaStatoSync('☁️ Nessun dato cloud');
       return;
     }
 
     const conferma = confirm(
-`Sono stati trovati ${datiCloud.length} record nel cloud.
+`✅ Trovati ${datiCloud.length} record nel cloud per "${paziente}".
 
-Vuoi sostituire i dati locali del paziente attivo?`
+Vuoi aggiornare i dati locali con quelli del cloud?`
     );
 
-    if (!conferma) return;
+    if (!conferma){
+      aggiornaStatoSync('☁️ Sync annullata');
+      return;
+    }
 
     const altri = getData().filter(r => r.paziente !== paziente);
-
     setData(
       [...datiCloud, ...altri]
         .sort((a,b) => String(b.data).localeCompare(String(a.data)))
@@ -1009,12 +1000,13 @@ Vuoi sostituire i dati locali del paziente attivo?`
 
     render();
     caricaOPulisciPerData();
-
-    msg('Sincronizzazione cloud completata.');
+    aggiornaStatoSync('☁️ Sync OK');
+    alert(`✅ Sincronizzazione completata!\nCaricati ${datiCloud.length} record dal cloud.`);
 
   } catch(err){
     console.error(err);
-    msg('Errore durante sincronizzazione cloud.', false);
+    alert('❌ Errore:\n' + (err?.message || err));
+    aggiornaStatoSync('☁️ Errore sync');
   }
 }
 
