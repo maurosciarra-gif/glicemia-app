@@ -469,7 +469,9 @@
             <tr>
               <th>Data</th>
               <th>Colazione</th>
+              <th>Dopo col.</th>
               <th>Pranzo</th>
+              <th>Dopo pra.</th>
               <th>Cena</th>
               <th>Dopo cena</th>
               <th>Insulina totale</th>
@@ -489,7 +491,9 @@
               <th>Paziente</th>
               <th>Data</th>
               <th>Dose colazione</th>
+              <th>Dopo col.</th>
               <th>Dose pranzo</th>
+              <th>Dopo pra.</th>
               <th>Dose cena</th>
               <th>Dose notte</th>
               <th>Insulina notte</th>
@@ -650,6 +654,10 @@
       return snap.data();
     }
   };
+
+  // Segnala che Firebase è pronto
+  window.firebaseReady = true;
+  window.dispatchEvent(new Event('firebaseReady'));
 </script>
 
 <script>
@@ -887,7 +895,11 @@ function mostraAlertRange(inputId, warnId){
 async function syncSchemaPazienteDaCloud(){
   try{
     const paziente = getPaziente().trim();
-    if (!paziente || !window.cloudApi) return;
+    if (!paziente) return;
+    if (!window.cloudApi) {
+      window.addEventListener('firebaseReady', () => syncSchemaPazienteDaCloud(), { once: true });
+      return;
+    }
 
     const dati = await window.cloudApi.caricaSchemaPaziente(paziente);
     if (dati && Array.isArray(dati.schema) && dati.schema.length){
@@ -902,7 +914,11 @@ async function syncSchemaPazienteDaCloud(){
 function syncLocaleDaCloudRealtime(){
   try{
     const paziente = getPaziente().trim();
-    if (!window.cloudApi || !paziente) return;
+    if (!paziente) return;
+    if (!window.cloudApi) {
+      window.addEventListener('firebaseReady', () => syncLocaleDaCloudRealtime(), { once: true });
+      return;
+    }
 
     if (stopCloudRealtime){
       stopCloudRealtime();
@@ -959,53 +975,39 @@ function syncLocaleDaCloudRealtime(){
 
 async function forzaSyncCloud(){
   const paziente = getPaziente().trim();
-
   if (!paziente){
     alert('Prima salva il nome paziente.');
     return;
   }
-
   if (!window.cloudApi){
     alert('❌ Firebase non ancora pronto. Attendi qualche secondo e riprova.');
     return;
   }
-
   aggiornaStatoSync('☁️ Sincronizzazione in corso...');
-
   try{
     const datiCloud = await window.cloudApi.caricaGiornatePaziente(paziente);
-
     if (!Array.isArray(datiCloud) || datiCloud.length === 0){
-      alert(`⚠️ Nessun dato trovato nel cloud per il paziente:\n"${paziente}"\n\nControlla che il nome sia scritto uguale su entrambi i telefoni.`);
+      alert(`⚠️ Nessun dato trovato nel cloud per:
+"${paziente}"
+
+Controlla che il nome sia scritto uguale su entrambi i telefoni.`);
       aggiornaStatoSync('☁️ Nessun dato cloud');
       return;
     }
+    const conferma = confirm(`✅ Trovati ${datiCloud.length} record nel cloud.
 
-    const conferma = confirm(
-`✅ Trovati ${datiCloud.length} record nel cloud per "${paziente}".
-
-Vuoi aggiornare i dati locali con quelli del cloud?`
-    );
-
-    if (!conferma){
-      aggiornaStatoSync('☁️ Sync annullata');
-      return;
-    }
-
+Vuoi aggiornare i dati locali?`);
+    if (!conferma){ aggiornaStatoSync('☁️ Sync annullata'); return; }
     const altri = getData().filter(r => r.paziente !== paziente);
-    setData(
-      [...datiCloud, ...altri]
-        .sort((a,b) => String(b.data).localeCompare(String(a.data)))
-    );
-
+    setData([...datiCloud, ...altri].sort((a,b) => String(b.data).localeCompare(String(a.data))));
     render();
     caricaOPulisciPerData();
     aggiornaStatoSync('☁️ Sync OK');
-    alert(`✅ Sincronizzazione completata!\nCaricati ${datiCloud.length} record dal cloud.`);
-
+    alert(`✅ Completata! Caricati ${datiCloud.length} record dal cloud.`);
   } catch(err){
     console.error(err);
-    alert('❌ Errore:\n' + (err?.message || err));
+    alert('❌ Errore:
+' + (err?.message || err));
     aggiornaStatoSync('☁️ Errore sync');
   }
 }
@@ -1683,7 +1685,7 @@ function aggiornaReportCompleto(){
   tbody.innerHTML = '';
 
   if (!dati.length){
-    tbody.innerHTML = '<tr><td colspan="6" class="empty">Nessun dato disponibile.</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="8" class="empty">Nessun dato disponibile.</td></tr>';
     return;
   }
 
@@ -1698,7 +1700,9 @@ function aggiornaReportCompleto(){
       <tr>
         <td>${r.data || '-'}</td>
         <td>${r.glicemiaColazione || '-'}</td>
+        <td>${r.glicemiaDopoColazione || '-'}</td>
         <td>${r.glicemiaPranzo || '-'}</td>
+        <td>${r.glicemiaDopoPranzo || '-'}</td>
         <td>${r.glicemiaCena || '-'}</td>
         <td>${r.glicemiaDopoCena || '-'}</td>
         <td>${insTot}</td>
@@ -1763,7 +1767,7 @@ function renderTabellaDosi(dati){
   tbody.innerHTML = '';
 
   if (!filtrati.length){
-    tbody.innerHTML = '<tr><td colspan="8" class="empty">Nessun dettaglio dose.</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="10" class="empty">Nessun dettaglio dose.</td></tr>';
     return;
   }
 
@@ -1773,7 +1777,9 @@ function renderTabellaDosi(dati){
       <td>${r.paziente || '-'}</td>
       <td>${r.data || '-'}</td>
       <td>${r.doseConsigliataColazione || '-'}</td>
+      <td>${r.glicemiaDopoColazione || '-'}</td>
       <td>${r.doseConsigliataPranzo || '-'}</td>
+      <td>${r.glicemiaDopoPranzo || '-'}</td>
       <td>${r.doseConsigliataCena || '-'}</td>
       <td>${r.doseConsigliataNotte || '-'}</td>
       <td>${r.insulinaNotte || '-'}</td>
@@ -1894,8 +1900,10 @@ function esportaPDF(){
     r.data || '',
     r.glicemiaColazione || '',
     r.insulinaColazione || '',
+    r.glicemiaDopoColazione || '',
     r.glicemiaPranzo || '',
     r.insulinaPranzo || '',
+    r.glicemiaDopoPranzo || '',
     r.glicemiaCena || '',
     r.insulinaCena || '',
     r.glicemiaDopoCena || '',
@@ -1908,8 +1916,10 @@ function esportaPDF(){
       'Data',
       'Glic. Col.',
       'Ins. Col.',
+      'Dopo Col.',
       'Glic. Pra.',
       'Ins. Pra.',
+      'Dopo Pra.',
       'Glic. Cena',
       'Ins. Cena',
       'Dopo Cena',
@@ -1982,10 +1992,18 @@ document.getElementById('data').addEventListener('change', caricaOPulisciPerData
 window.addEventListener('online', () => {
   aggiornaStatoConnessione();
   aggiornaStatoSync('☁️ Online - sync attiva');
+  if (getPaziente().trim()) syncLocaleDaCloudRealtime();
 });
 window.addEventListener('offline', () => {
   aggiornaStatoConnessione();
   aggiornaStatoSync('📴 Offline - uso locale');
+});
+
+// Sync automatica quando l'app torna in primo piano
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible' && getPaziente().trim() && navigator.onLine) {
+    syncLocaleDaCloudRealtime();
+  }
 });
 
 if (!getPaziente()){
@@ -2000,8 +2018,10 @@ caricaOPulisciPerData();
 aggiornaTutteLeDosi();
 render();
 syncSilenziosaIniziale = true;
-syncLocaleDaCloudRealtime();
-syncSchemaPazienteDaCloud();
+if (getPaziente().trim()) {
+  syncLocaleDaCloudRealtime();
+  syncSchemaPazienteDaCloud();
+}
 </script>
 
 <script>
