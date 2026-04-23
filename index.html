@@ -921,37 +921,51 @@ function syncLocaleDaCloudRealtime(){
     }
 
     stopCloudRealtime = window.cloudApi.ascoltaGiornateRealtime(paziente, (datiCloud) => {
-      if (!Array.isArray(datiCloud)) return;
 
-      let locali = getData();
-      let map = {};
+  if (!Array.isArray(datiCloud)) return;
 
-      [...locali, ...datiCloud].forEach(r => {
+  let locali = getData();
+  let map = {};
 
-        const key = chiaveRecord(r);
+  [...locali, ...datiCloud].forEach(r => {
 
-        if (!map[key]) {
-          map[key] = r;
-        } else {
+    const key = chiaveRecord(r);
 
-          const t1 = map[key].ultimoAggiornamento 
-            ? new Date(map[key].ultimoAggiornamento).getTime() 
-            : 0;
+    if (!map[key]) {
+      map[key] = r;
+    } else {
 
-          const t2 = r.ultimoAggiornamento 
-            ? new Date(r.ultimoAggiornamento).getTime() 
-            : 0;
+      const t1 = map[key].ultimoAggiornamento 
+        ? new Date(map[key].ultimoAggiornamento).getTime() 
+        : 0;
 
-          // 🔥 VINCE SEMPRE IL PIÙ RECENTE
-          // se uguali → cloud vince
-          if (t2 >= t1) {
-            map[key] = r;
-          }
+      const t2 = r.ultimoAggiornamento 
+        ? new Date(r.ultimoAggiornamento).getTime() 
+        : 0;
 
-        }
+      // 🔥 VINCE SEMPRE IL PIÙ RECENTE
+      if (t2 >= t1) {
+        map[key] = r;
+      }
 
-      });
+    }
 
+  });
+
+  // 🔥 QUI ERA IL PROBLEMA → mancava questa parte
+  const uniti = Object.values(map)
+    .sort((a,b) => String(b.data).localeCompare(String(a.data)));
+
+  setData(uniti);
+
+  // 🔥 aggiorna UI
+  render();
+  caricaOPulisciPerData();
+
+  // 🔥 feedback visivo
+  aggiornaStatoSync('☁️ Sync OK');
+
+});
       const uniti = Object.values(map)
         .sort((a,b) => String(b.data).localeCompare(String(a.data)));
 
