@@ -1,4 +1,4 @@
-  <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="it">
 <head>
   <meta charset="UTF-8" />
@@ -921,51 +921,37 @@ function syncLocaleDaCloudRealtime(){
     }
 
     stopCloudRealtime = window.cloudApi.ascoltaGiornateRealtime(paziente, (datiCloud) => {
+      if (!Array.isArray(datiCloud)) return;
 
-  if (!Array.isArray(datiCloud)) return;
+      let locali = getData();
+      let map = {};
 
-  let locali = getData();
-  let map = {};
+      [...locali, ...datiCloud].forEach(r => {
 
-  [...locali, ...datiCloud].forEach(r => {
+        const key = chiaveRecord(r);
 
-    const key = chiaveRecord(r);
+        if (!map[key]) {
+          map[key] = r;
+        } else {
 
-    if (!map[key]) {
-      map[key] = r;
-    } else {
+          const t1 = map[key].ultimoAggiornamento 
+            ? new Date(map[key].ultimoAggiornamento).getTime() 
+            : 0;
 
-      const t1 = map[key].ultimoAggiornamento 
-        ? new Date(map[key].ultimoAggiornamento).getTime() 
-        : 0;
+          const t2 = r.ultimoAggiornamento 
+            ? new Date(r.ultimoAggiornamento).getTime() 
+            : 0;
 
-      const t2 = r.ultimoAggiornamento 
-        ? new Date(r.ultimoAggiornamento).getTime() 
-        : 0;
+          // 🔥 VINCE SEMPRE IL PIÙ RECENTE
+          // se uguali → cloud vince
+          if (t2 >= t1) {
+            map[key] = r;
+          }
 
-      // 🔥 VINCE SEMPRE IL PIÙ RECENTE
-      if (t2 >= t1) {
-        map[key] = r;
-      }
+        }
 
-    }
+      });
 
-  });
-
-  // 🔥 QUI ERA IL PROBLEMA → mancava questa parte
-  const uniti = Object.values(map)
-    .sort((a,b) => String(b.data).localeCompare(String(a.data)));
-
-  setData(uniti);
-
-  // 🔥 aggiorna UI
-  render();
-  caricaOPulisciPerData();
-
-  // 🔥 feedback visivo
-  aggiornaStatoSync('☁️ Sync OK');
-
-});
       const uniti = Object.values(map)
         .sort((a,b) => String(b.data).localeCompare(String(a.data)));
 
@@ -2014,43 +2000,16 @@ if (!getPaziente()){
   apriImpostazioni();
 }
 
-window.addEventListener("load", () => {
-
-  console.log("APP AVVIATA");
-
-  aggiornaPazienteUI();
-  aggiornaStatoConnessione();
-  aggiornaStatoSync('☁️ Avvio app...');
-
-  document.getElementById('data').value = oggi();
-
-  caricaOPulisciPerData();
-  aggiornaTutteLeDosi();
-  render();
-
-  const paziente = getPaziente();
-
-  if (!paziente){
-    aggiornaStatoSync('⚠️ Nessun paziente');
-    return;
-  }
-
-  function startSync(){
-    console.log("SYNC AVVIATO");
-    syncSilenziosaIniziale = true;
-    syncSchemaPazienteDaCloud();
-    syncLocaleDaCloudRealtime();
-  }
-
-  // 🔥 attesa Firebase sicura
-  if (window.cloudApi){
-    startSync();
-  } else {
-    console.log("Attendo Firebase...");
-    window.addEventListener('firebaseReady', startSync, { once: true });
-  }
-
-});
+document.getElementById('data').value = oggi();
+aggiornaPazienteUI();
+aggiornaStatoConnessione();
+aggiornaStatoSync('☁️ Sync pronta');
+caricaOPulisciPerData();
+aggiornaTutteLeDosi();
+render();
+syncSilenziosaIniziale = true;
+syncLocaleDaCloudRealtime();
+syncSchemaPazienteDaCloud();
 </script>
 
 <script>
