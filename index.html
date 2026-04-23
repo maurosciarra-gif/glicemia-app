@@ -1990,10 +1990,31 @@ document.getElementById('data').addEventListener('change', caricaOPulisciPerData
 window.addEventListener('online', () => {
   aggiornaStatoConnessione();
   aggiornaStatoSync('☁️ Online - sync attiva');
+  if (getPaziente().trim()) {
+    syncLocaleDaCloudRealtime();
+  }
 });
 window.addEventListener('offline', () => {
   aggiornaStatoConnessione();
   aggiornaStatoSync('📴 Offline - uso locale');
+});
+
+// Sync automatica quando l'app torna in primo piano
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible') {
+    if (getPaziente().trim() && navigator.onLine) {
+      aggiornaStatoSync('☁️ Riconnessione in corso...');
+      syncLocaleDaCloudRealtime();
+      syncSchemaPazienteDaCloud();
+    }
+  }
+});
+
+// Sync automatica quando si torna alla finestra (desktop)
+window.addEventListener('focus', () => {
+  if (getPaziente().trim() && navigator.onLine) {
+    syncLocaleDaCloudRealtime();
+  }
 });
 
 if (!getPaziente()){
