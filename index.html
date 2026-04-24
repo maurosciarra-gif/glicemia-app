@@ -561,6 +561,7 @@
       <button class="btn btn-soft" onclick="creaBackupJSON()">Backup</button>
       <button class="btn btn-soft" onclick="document.getElementById('fileRipristino').click()">Ripristina da file</button>
       <button class="btn btn-soft" onclick="forzaSyncCloud()">Sincronizza dal cloud</button>
+      <button class="btn btn-soft" onclick="caricaTuttoSuCloud()">⬆️ Carica tutto sul cloud</button>
       <button class="btn btn-danger" onclick="svuotaTuttoConferma()">Svuota tutto</button>
     </div>
 
@@ -968,6 +969,56 @@ function syncLocaleDaCloudRealtime(){
   } catch(err){
     console.error('Errore realtime cloud:', err);
     msg('Cloud realtime non disponibile.', false);
+  }
+}
+
+async function caricaTuttoSuCloud(){
+  const paziente = getPaziente().trim();
+  if (!paziente){
+    msg('Prima salva il nome paziente.', false);
+    return;
+  }
+  if (!window.cloudApi){
+    msg('Firebase non pronto. Riprova tra qualche secondo.', false);
+    return;
+  }
+
+  const dati = getData().filter(r => r.paziente === paziente);
+  if (!dati.length){
+    msg('Nessun dato locale da caricare.', false);
+    return;
+  }
+
+  const conferma = confirm(
+`Vuoi caricare ${dati.length} record locali sul cloud?
+
+Questo aggiornerà tutti i dati su Firebase, inclusi quelli vecchi.`
+  );
+  if (!conferma) return;
+
+  aggiornaStatoSync('☁️ Caricamento in corso...');
+  chiudiImpostazioni();
+
+  let caricati = 0;
+  let errori = 0;
+
+  for (const record of dati) {
+    try {
+      await window.cloudApi.salvaGiornata(record);
+      caricati++;
+      aggiornaStatoSync(`☁️ Caricamento: ${caricati}/${dati.length}...`);
+    } catch(err) {
+      console.error('Errore caricamento record:', err);
+      errori++;
+    }
+  }
+
+  if (errori === 0){
+    aggiornaStatoSync('☁️ Sync OK');
+    alert(`✅ Completato! ${caricati} record caricati sul cloud.`);
+  } else {
+    aggiornaStatoSync('☁️ Sync parziale');
+    alert(`⚠️ Completato con ${errori} errori. ${caricati} record caricati.`);
   }
 }
 
