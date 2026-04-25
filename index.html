@@ -458,10 +458,6 @@
           <span>Giorni registrati</span>
           <strong id="numR">0</strong>
         </div>
-        <div class="summary-box">
-          <span>HbA1c stimata</span>
-          <strong id="hba1c">-</strong>
-        </div>
       </div>
     </div>
 
@@ -472,8 +468,11 @@
           <thead>
             <tr>
               <th>Data</th>
+              <th>Trend</th>
               <th>Colazione</th>
+              <th>Dopo col.</th>
               <th>Pranzo</th>
+              <th>Dopo pra.</th>
               <th>Cena</th>
               <th>Dopo cena</th>
               <th>Insulina totale</th>
@@ -493,9 +492,7 @@
               <th>Paziente</th>
               <th>Data</th>
               <th>Dose colazione</th>
-              <th>Dopo col.</th>
               <th>Dose pranzo</th>
-              <th>Dopo pra.</th>
               <th>Dose cena</th>
               <th>Dose notte</th>
               <th>Insulina notte</th>
@@ -563,7 +560,6 @@
       <button class="btn btn-soft" onclick="creaBackupJSON()">Backup</button>
       <button class="btn btn-soft" onclick="document.getElementById('fileRipristino').click()">Ripristina da file</button>
       <button class="btn btn-soft" onclick="forzaSyncCloud()">Sincronizza dal cloud</button>
-      <button class="btn btn-soft" onclick="caricaTuttoSuCloud()">⬆️ Carica tutto sul cloud</button>
       <button class="btn btn-danger" onclick="svuotaTuttoConferma()">Svuota tutto</button>
     </div>
 
@@ -657,8 +653,6 @@
       return snap.data();
     }
   };
-  window.firebaseReady = true;
-  window.dispatchEvent(new Event('firebaseReady'));
 </script>
 
 <script>
@@ -896,11 +890,7 @@ function mostraAlertRange(inputId, warnId){
 async function syncSchemaPazienteDaCloud(){
   try{
     const paziente = getPaziente().trim();
-    if (!paziente) return;
-    if (!window.cloudApi) {
-      window.addEventListener('firebaseReady', () => syncSchemaPazienteDaCloud(), { once: true });
-      return;
-    }
+    if (!paziente || !window.cloudApi) return;
 
     const dati = await window.cloudApi.caricaSchemaPaziente(paziente);
     if (dati && Array.isArray(dati.schema) && dati.schema.length){
@@ -915,11 +905,7 @@ async function syncSchemaPazienteDaCloud(){
 function syncLocaleDaCloudRealtime(){
   try{
     const paziente = getPaziente().trim();
-    if (!paziente) return;
-    if (!window.cloudApi) {
-      window.addEventListener('firebaseReady', () => syncLocaleDaCloudRealtime(), { once: true });
-      return;
-    }
+    if (!window.cloudApi || !paziente) return;
 
     if (stopCloudRealtime){
       stopCloudRealtime();
@@ -974,25 +960,6 @@ function syncLocaleDaCloudRealtime(){
   }
 }
 
-async function caricaTuttoSuCloud(){
-  const paziente = getPaziente().trim();
-  if (!paziente){ msg('Prima salva il nome paziente.', false); return; }
-  if (!window.cloudApi){ msg('Firebase non pronto. Riprova tra qualche secondo.', false); return; }
-  const dati = getData().filter(r => r.paziente === paziente);
-  if (!dati.length){ msg('Nessun dato locale da caricare.', false); return; }
-  const conferma = confirm(`Vuoi caricare ${dati.length} record locali sul cloud?`);
-  if (!conferma) return;
-  aggiornaStatoSync('☁️ Caricamento in corso...');
-  chiudiImpostazioni();
-  let caricati = 0; let errori = 0;
-  for (const record of dati) {
-    try { await window.cloudApi.salvaGiornata(record); caricati++; aggiornaStatoSync(`☁️ Caricamento: ${caricati}/${dati.length}...`); }
-    catch(err) { errori++; }
-  }
-  aggiornaStatoSync(errori === 0 ? '☁️ Sync OK' : '☁️ Sync parziale');
-  alert(errori === 0 ? `✅ Completato! ${caricati} record caricati.` : `⚠️ ${caricati} caricati, ${errori} errori.`);
-}
-
 async function forzaSyncCloud(){
   try{
     const paziente = getPaziente().trim();
@@ -1009,7 +976,7 @@ async function forzaSyncCloud(){
 
     msg('Sincronizzazione in corso...');
 
-    const datiCloud = await window.cloudApi.caricaGiornatePaziente(paziente);
+    const datiCloud = await window.cloudApi.caricaTutteLeGiornatePaziente(paziente);
 
     if (!Array.isArray(datiCloud) || datiCloud.length === 0){
       msg('Nessun dato trovato nel cloud.', false);
@@ -1698,16 +1665,9 @@ function aggiornaRiepilogo(dati){
   });
 
   document.getElementById('reportPaziente').textContent = paziente || '-';
-  const media = mediaNumerica(tutteGlicemie);
-  document.getElementById('mediaG').textContent = media;
+  document.getElementById('mediaG').textContent = mediaNumerica(tutteGlicemie);
   document.getElementById('totaleI').textContent = sommaNumerica(tutteInsuline);
   document.getElementById('numR').textContent = filtrati.length;
-  const mediaNum = parseFloat(media);
-  if (!isNaN(mediaNum)){
-    document.getElementById('hba1c').textContent = ((mediaNum + 46.7) / 28.7).toFixed(1) + ' %';
-  } else {
-    document.getElementById('hba1c').textContent = '-';
-  }
 }
 
 function aggiornaReportCompleto(){
@@ -1722,22 +1682,35 @@ function aggiornaReportCompleto(){
   tbody.innerHTML = '';
 
   if (!dati.length){
-    tbody.innerHTML = '<tr><td colspan="6" class="empty">Nessun dato disponibile.</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="9" class="empty">Nessun dato disponibile.</td></tr>';
     return;
   }
 
-  dati.forEach(r => {
+  dati.forEach((r, i) => {
     const insTot =
       Number(r.insulinaColazione || 0) +
       Number(r.insulinaPranzo || 0) +
       Number(r.insulinaCena || 0) +
       Number(r.insulinaNotte || 0);
 
+    const gOggi = r.glicemiaDopoCena || r.glicemiaCena;
+    const gPrec = dati[i+1] ? (dati[i+1].glicemiaDopoCena || dati[i+1].glicemiaCena) : null;
+    let trend = '-'; let trendColor = '#6b7280';
+    if (gOggi && gPrec){
+      const diff = Number(gOggi) - Number(gPrec);
+      if (diff > 15){ trend = '↑'; trendColor = '#dc2626'; }
+      else if (diff < -15){ trend = '↓'; trendColor = '#16a34a'; }
+      else { trend = '→'; trendColor = '#6b7280'; }
+    }
+
     tbody.innerHTML += `
       <tr>
         <td>${r.data || '-'}</td>
+        <td style="font-size:20px;font-weight:900;color:${trendColor}">${trend}</td>
         <td>${r.glicemiaColazione || '-'}</td>
+        <td>${r.glicemiaDopoColazione || '-'}</td>
         <td>${r.glicemiaPranzo || '-'}</td>
+        <td>${r.glicemiaDopoPranzo || '-'}</td>
         <td>${r.glicemiaCena || '-'}</td>
         <td>${r.glicemiaDopoCena || '-'}</td>
         <td>${insTot}</td>
@@ -1802,7 +1775,7 @@ function renderTabellaDosi(dati){
   tbody.innerHTML = '';
 
   if (!filtrati.length){
-    tbody.innerHTML = '<tr><td colspan="10" class="empty">Nessun dettaglio dose.</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="8" class="empty">Nessun dettaglio dose.</td></tr>';
     return;
   }
 
@@ -1812,9 +1785,7 @@ function renderTabellaDosi(dati){
       <td>${r.paziente || '-'}</td>
       <td>${r.data || '-'}</td>
       <td>${r.doseConsigliataColazione || '-'}</td>
-      <td>${r.glicemiaDopoColazione || '-'}</td>
       <td>${r.doseConsigliataPranzo || '-'}</td>
-      <td>${r.glicemiaDopoPranzo || '-'}</td>
       <td>${r.doseConsigliataCena || '-'}</td>
       <td>${r.doseConsigliataNotte || '-'}</td>
       <td>${r.insulinaNotte || '-'}</td>
@@ -1935,10 +1906,8 @@ function esportaPDF(){
     r.data || '',
     r.glicemiaColazione || '',
     r.insulinaColazione || '',
-    r.glicemiaDopoColazione || '',
     r.glicemiaPranzo || '',
     r.insulinaPranzo || '',
-    r.glicemiaDopoPranzo || '',
     r.glicemiaCena || '',
     r.insulinaCena || '',
     r.glicemiaDopoCena || '',
@@ -1951,10 +1920,8 @@ function esportaPDF(){
       'Data',
       'Glic. Col.',
       'Ins. Col.',
-      'Dopo Col.',
       'Glic. Pra.',
       'Ins. Pra.',
-      'Dopo Pra.',
       'Glic. Cena',
       'Ins. Cena',
       'Dopo Cena',
@@ -2027,16 +1994,10 @@ document.getElementById('data').addEventListener('change', caricaOPulisciPerData
 window.addEventListener('online', () => {
   aggiornaStatoConnessione();
   aggiornaStatoSync('☁️ Online - sync attiva');
-  if (getPaziente().trim()) syncLocaleDaCloudRealtime();
 });
 window.addEventListener('offline', () => {
   aggiornaStatoConnessione();
   aggiornaStatoSync('📴 Offline - uso locale');
-});
-document.addEventListener('visibilitychange', () => {
-  if (document.visibilityState === 'visible' && getPaziente().trim() && navigator.onLine) {
-    syncLocaleDaCloudRealtime();
-  }
 });
 
 if (!getPaziente()){
@@ -2051,10 +2012,8 @@ caricaOPulisciPerData();
 aggiornaTutteLeDosi();
 render();
 syncSilenziosaIniziale = true;
-if (getPaziente().trim()) {
-  syncLocaleDaCloudRealtime();
-  syncSchemaPazienteDaCloud();
-}
+syncLocaleDaCloudRealtime();
+syncSchemaPazienteDaCloud();
 </script>
 
 <script>
