@@ -1,4 +1,4 @@
-const CACHE_NAME = 'glicemia-app-v10';
+const CACHE_NAME = 'glicemia-app-v11';
 const FILES_DA_CACHARE = [
   './',
   './index.html',
