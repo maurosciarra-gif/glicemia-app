@@ -468,11 +468,8 @@
           <thead>
             <tr>
               <th>Data</th>
-              <th>Trend</th>
               <th>Colazione</th>
-              <th>Dopo col.</th>
               <th>Pranzo</th>
-              <th>Dopo pra.</th>
               <th>Cena</th>
               <th>Dopo cena</th>
               <th>Insulina totale</th>
@@ -560,6 +557,7 @@
       <button class="btn btn-soft" onclick="creaBackupJSON()">Backup</button>
       <button class="btn btn-soft" onclick="document.getElementById('fileRipristino').click()">Ripristina da file</button>
       <button class="btn btn-soft" onclick="forzaSyncCloud()">Sincronizza dal cloud</button>
+      <button class="btn btn-soft" onclick="caricaTuttoSuCloud()">⬆️ Carica tutto sul cloud</button>
       <button class="btn btn-danger" onclick="svuotaTuttoConferma()">Svuota tutto</button>
     </div>
 
@@ -958,6 +956,25 @@ function syncLocaleDaCloudRealtime(){
     console.error('Errore realtime cloud:', err);
     msg('Cloud realtime non disponibile.', false);
   }
+}
+
+async function caricaTuttoSuCloud(){
+  const paziente = getPaziente().trim();
+  if (!paziente){ msg('Prima salva il nome paziente.', false); return; }
+  if (!window.cloudApi){ msg('Firebase non pronto. Riprova tra qualche secondo.', false); return; }
+  const dati = getData().filter(r => r.paziente === paziente);
+  if (!dati.length){ msg('Nessun dato locale da caricare.', false); return; }
+  const conferma = confirm(`Vuoi caricare ${dati.length} record locali sul cloud?`);
+  if (!conferma) return;
+  aggiornaStatoSync('☁️ Caricamento in corso...');
+  chiudiImpostazioni();
+  let caricati = 0; let errori = 0;
+  for (const record of dati) {
+    try { await window.cloudApi.salvaGiornata(record); caricati++; aggiornaStatoSync(`☁️ Caricamento: ${caricati}/${dati.length}...`); }
+    catch(err) { errori++; }
+  }
+  aggiornaStatoSync(errori === 0 ? '☁️ Sync OK' : '☁️ Sync parziale');
+  alert(errori === 0 ? `✅ Completato! ${caricati} record caricati.` : `⚠️ ${caricati} caricati, ${errori} errori.`);
 }
 
 async function forzaSyncCloud(){
@@ -1682,35 +1699,22 @@ function aggiornaReportCompleto(){
   tbody.innerHTML = '';
 
   if (!dati.length){
-    tbody.innerHTML = '<tr><td colspan="9" class="empty">Nessun dato disponibile.</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="6" class="empty">Nessun dato disponibile.</td></tr>';
     return;
   }
 
-  dati.forEach((r, i) => {
+  dati.forEach(r => {
     const insTot =
       Number(r.insulinaColazione || 0) +
       Number(r.insulinaPranzo || 0) +
       Number(r.insulinaCena || 0) +
       Number(r.insulinaNotte || 0);
 
-    const gOggi = r.glicemiaDopoCena || r.glicemiaCena;
-    const gPrec = dati[i+1] ? (dati[i+1].glicemiaDopoCena || dati[i+1].glicemiaCena) : null;
-    let trend = '-'; let trendColor = '#6b7280';
-    if (gOggi && gPrec){
-      const diff = Number(gOggi) - Number(gPrec);
-      if (diff > 15){ trend = '↑'; trendColor = '#dc2626'; }
-      else if (diff < -15){ trend = '↓'; trendColor = '#16a34a'; }
-      else { trend = '→'; trendColor = '#6b7280'; }
-    }
-
     tbody.innerHTML += `
       <tr>
         <td>${r.data || '-'}</td>
-        <td style="font-size:20px;font-weight:900;color:${trendColor}">${trend}</td>
         <td>${r.glicemiaColazione || '-'}</td>
-        <td>${r.glicemiaDopoColazione || '-'}</td>
         <td>${r.glicemiaPranzo || '-'}</td>
-        <td>${r.glicemiaDopoPranzo || '-'}</td>
         <td>${r.glicemiaCena || '-'}</td>
         <td>${r.glicemiaDopoCena || '-'}</td>
         <td>${insTot}</td>
