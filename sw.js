@@ -1,4 +1,4 @@
- const CACHE_NAME = 'glicemia-app-v1';
+ const CACHE_NAME = 'glicemia-app-v2';
 const FILES_DA_CACHARE = [
   './',
   './index.html',
@@ -13,7 +13,9 @@ const FILES_DA_CACHARE = [
 // Installazione: salva i file in cache
 self.addEventListener('install', event => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then(cache => cache.addAll(FILES_DA_CACHARE))
+    caches.open(CACHE_NAME).then(cache => {
+      return cache.addAll(FILES_DA_CACHARE);
+    }).catch(err => console.log('Cache install error:', err))
   );
   self.skipWaiting();
 });
@@ -28,9 +30,40 @@ self.addEventListener('activate', event => {
   self.clients.claim();
 });
 
-// Fetch: usa cache se disponibile, altrimenti rete
+// Fetch: strategia intelligente
 self.addEventListener('fetch', event => {
+  const url = new URL(event.request.url);
+
+  // Firebase e googleapis: sempre dalla rete, non cachare
+  if (
+    url.hostname.includes('firebase') ||
+    url.hostname.includes('googleapis') ||
+    url.hostname.includes('gstatic') ||
+    url.hostname.includes('firestore')
+  ) {
+    event.respondWith(fetch(event.request).catch(() => new Response('', { status: 503 })));
+    return;
+  }
+
+  // Per tutto il resto: cache first, poi rete
   event.respondWith(
-    caches.match(event.request).then(cached => cached || fetch(event.request))
+    caches.match(event.request).then(cached => {
+      if (cached) return cached;
+
+      return fetch(event.request).then(response => {
+        // Salva in cache solo risorse valide
+        if (response && response.status === 200 && response.type !== 'opaque') {
+          const responseClone = response.clone();
+          caches.open(CACHE_NAME).then(cache => cache.put(event.request, responseClone));
+        }
+        return response;
+      }).catch(() => {
+        // Offline fallback: restituisce index.html per navigazione
+        if (event.request.destination === 'document') {
+          return caches.match('./index.html');
+        }
+        return new Response('Offline', { status: 503 });
+      });
+    })
   );
 });
