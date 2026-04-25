@@ -1,4 +1,4 @@
-{
+ {
   "name": "Glicemia App PRO",
   "short_name": "Glicemia",
   "description": "App per registrazione glicemia e insulina con sincronizzazione cloud",
@@ -7,7 +7,7 @@
   "display": "standalone",
   "background_color": "#efefef",
   "theme_color": "#3b82f6",
-  "orientation": "portrait",
+  "orientation": "any",
   "icons": [
     {
       "src": "icon-192.png",
