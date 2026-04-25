@@ -1,39 +1,36 @@
-const CACHE_NAME = 'glicemia-app-v4';
-
-const urlsToCache = [
+ const CACHE_NAME = 'glicemia-app-v1';
+const FILES_DA_CACHARE = [
   './',
   './index.html',
   './manifest.json',
   './icon-192.png',
-  './icon-512.png'
+  './icon-512.png',
+  'https://cdn.jsdelivr.net/npm/chart.js',
+  'https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js',
+  'https://cdn.jsdelivr.net/npm/jspdf-autotable@3.8.2/dist/jspdf.plugin.autotable.min.js'
 ];
 
-// install
+// Installazione: salva i file in cache
 self.addEventListener('install', event => {
-  self.skipWaiting();
   event.waitUntil(
-    caches.open(CACHE_NAME).then(cache => cache.addAll(urlsToCache))
+    caches.open(CACHE_NAME).then(cache => cache.addAll(FILES_DA_CACHARE))
   );
+  self.skipWaiting();
 });
 
-// activate
+// Attivazione: rimuove cache vecchie
 self.addEventListener('activate', event => {
   event.waitUntil(
     caches.keys().then(keys =>
-      Promise.all(keys.map(key => {
-        if (key !== CACHE_NAME) return caches.delete(key);
-      }))
+      Promise.all(keys.filter(k => k !== CACHE_NAME).map(k => caches.delete(k)))
     )
   );
   self.clients.claim();
 });
 
-// fetch (🔥 FIX IMPORTANTE)
+// Fetch: usa cache se disponibile, altrimenti rete
 self.addEventListener('fetch', event => {
-  if (event.request.method !== 'GET') return;
-
   event.respondWith(
-    fetch(event.request)
-      .catch(() => caches.match(event.request))
+    caches.match(event.request).then(cached => cached || fetch(event.request))
   );
 });
