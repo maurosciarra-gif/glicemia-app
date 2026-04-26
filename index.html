@@ -2,7 +2,7 @@
 <html lang="it">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>Glicemia App PRO</title>
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#3b82f6">
@@ -330,50 +330,33 @@
       font-size:15px;
     }
 
-    .hidden{
-      display:none !important;
-    }
+    .hidden{ display:none !important; }
 
     .tab-bar{
-      display:flex;
-      gap:6px;
-      margin-bottom:14px;
-      overflow-x:auto;
-      padding-bottom:4px;
-      scrollbar-width:none;
+      display:flex; gap:6px; margin-bottom:14px;
+      overflow-x:auto; padding-bottom:4px; scrollbar-width:none;
     }
     .tab-bar::-webkit-scrollbar{ display:none; }
     .tab-btn{
-      flex:1;
-      min-width:70px;
-      min-height:44px;
-      border:none;
-      border-radius:14px;
-      background:#e5e7eb;
-      color:#374151;
-      font-size:13px;
-      font-weight:700;
-      cursor:pointer;
-      white-space:nowrap;
-      padding:8px 6px;
-      transition:background .15s, color .15s;
+      flex:1; min-width:70px; min-height:44px; border:none;
+      border-radius:14px; background:#e5e7eb; color:#374151;
+      font-size:13px; font-weight:700; cursor:pointer;
+      white-space:nowrap; padding:8px 6px;
     }
-    .tab-btn.active{
-      background:var(--blue);
-      color:#fff;
-    }
+    .tab-btn.active{ background:var(--blue); color:#fff; }
     .tab-panel{ display:none; }
     .tab-panel.active{ display:block; }
 
-    @media (orientation: landscape) and (max-width: 900px){
-      .app{ max-width:100%; padding:8px 10px 16px; }
+    @media (orientation: landscape){
+      .app{ max-width:100% !important; padding:8px 10px 16px; }
       .title{ font-size:20px; margin:4px 0 6px; }
       .subtitle{ font-size:12px; margin:0 0 6px; }
-      table{ min-width:600px; }
-      th, td{ padding:6px 6px; font-size:12px; }
+      table{ min-width:unset; width:100%; }
+      th, td{ padding:6px 8px; font-size:12px; }
       .panel{ padding:10px; margin-top:10px; }
       .panel h2{ font-size:16px; }
       .tab-btn{ font-size:11px; min-height:36px; }
+      .table-wrap{ overflow-x:auto; }
     }
   </style>
 </head>
@@ -508,15 +491,8 @@
           <table>
             <thead>
               <tr>
-                <th>Data</th>
-                <th>Trend</th>
-                <th>Colazione</th>
-                <th>Dopo col.</th>
-                <th>Pranzo</th>
-                <th>Dopo pra.</th>
-                <th>Cena</th>
-                <th>Dopo cena</th>
-                <th>Ins. tot.</th>
+                <th>Data</th><th>Trend</th><th>Colazione</th><th>Dopo col.</th>
+                <th>Pranzo</th><th>Dopo pra.</th><th>Cena</th><th>Dopo cena</th><th>Ins. tot.</th>
               </tr>
             </thead>
             <tbody id="tbodyReport"></tbody>
@@ -532,16 +508,8 @@
           <table>
             <thead>
               <tr>
-                <th>Paziente</th>
-                <th>Data</th>
-                <th>Dose col.</th>
-                <th>Dopo col.</th>
-                <th>Dose pra.</th>
-                <th>Dopo pra.</th>
-                <th>Dose cena</th>
-                <th>Dose notte</th>
-                <th>Ins. notte</th>
-                <th>Azioni</th>
+                <th>Paziente</th><th>Data</th><th>Dose col.</th><th>Dopo col.</th>
+                <th>Dose pra.</th><th>Dopo pra.</th><th>Dose cena</th><th>Dose notte</th><th>Ins. notte</th><th>Azioni</th>
               </tr>
             </thead>
             <tbody id="tbodyDosi"></tbody>
@@ -1015,25 +983,6 @@ function syncLocaleDaCloudRealtime(){
     console.error('Errore realtime cloud:', err);
     msg('Cloud realtime non disponibile.', false);
   }
-}
-
-async function caricaTuttoSuCloud(){
-  const paziente = getPaziente().trim();
-  if (!paziente){ msg('Prima salva il nome paziente.', false); return; }
-  if (!window.cloudApi){ msg('Firebase non pronto. Riprova tra qualche secondo.', false); return; }
-  const dati = getData().filter(r => r.paziente === paziente);
-  if (!dati.length){ msg('Nessun dato locale da caricare.', false); return; }
-  const conferma = confirm(`Vuoi caricare ${dati.length} record locali sul cloud?`);
-  if (!conferma) return;
-  aggiornaStatoSync('☁️ Caricamento in corso...');
-  chiudiImpostazioni();
-  let caricati = 0; let errori = 0;
-  for (const record of dati) {
-    try { await window.cloudApi.salvaGiornata(record); caricati++; aggiornaStatoSync(`☁️ Caricamento: ${caricati}/${dati.length}...`); }
-    catch(err) { errori++; }
-  }
-  aggiornaStatoSync(errori === 0 ? '☁️ Sync OK' : '☁️ Sync parziale');
-  alert(errori === 0 ? `✅ Completato! ${caricati} record caricati.` : `⚠️ ${caricati} caricati, ${errori} errori.`);
 }
 
 async function caricaTuttoSuCloud(){
@@ -1794,7 +1743,6 @@ function aggiornaReportCompleto(){
       Number(r.insulinaPranzo || 0) +
       Number(r.insulinaCena || 0) +
       Number(r.insulinaNotte || 0);
-
     const gOggi = r.glicemiaDopoCena || r.glicemiaCena;
     const gPrec = dati[i+1] ? (dati[i+1].glicemiaDopoCena || dati[i+1].glicemiaCena) : null;
     let trend = '-'; let trendColor = '#6b7280';
@@ -2022,17 +1970,9 @@ function esportaPDF(){
   doc.autoTable({
     startY: 28,
     head: [[
-      'Data',
-      'Glic. Col.',
-      'Ins. Col.',
-      'Dopo Col.',
-      'Glic. Pra.',
-      'Ins. Pra.',
-      'Dopo Pra.',
-      'Glic. Cena',
-      'Ins. Cena',
-      'Dopo Cena',
-      'Ins. Notte'
+      'Data','Glic. Col.','Ins. Col.','Dopo Col.',
+      'Glic. Pra.','Ins. Pra.','Dopo Pra.',
+      'Glic. Cena','Ins. Cena','Dopo Cena','Ins. Notte'
     ]],
     body: rows,
     styles: {
